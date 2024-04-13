@@ -2,6 +2,10 @@ const { User } = require('../models')
 
 
 module.exports = {
+    create : async (req, res) => {
+        const { email, password} = req.body;
+        
+    },
 
     read : async (req, res) => {
 
