@@ -1,11 +1,19 @@
 const bcrypt = require('bcrypt')
 
 module.exports = {
-    hashPassword : (password) => {
-        return bcrypt.hash(password, 10)
+    hashPassword : async (password) => {
+        try {
+            return await bcrypt.hash(password, 10)
+        } catch (error) {
+            throw new Error('Gagal mengenkripsi password')
+        }
     },
 
-    comparePassword : (password, hashedPassword) => {
-        return bcrypt.compare(password, hashedPassword)
+    comparePassword : async (password, hashedPassword) => {
+        try {
+            return await bcrypt.compare(password, hashedPassword) 
+        } catch (error) {
+            throw new Error('Gagal pengecekan password')
+        }
     }
 }
