@@ -38,7 +38,14 @@ module.exports = {
     },
 
     update : async (req, res) => {
-
+        try {
+            const { userId } = req.params
+            const { email, nama } = req.body
+            id ( !userId)
+            console.log(userId);
+        } catch (error) {
+            return res.status(500).json({ message : "Terjadi kesalahan saat mengupdate data pengguna", error: error.message })
+        }
     },
 
     delete : async (req, res) => {
