@@ -37,18 +37,50 @@ module.exports = {
         }
     },
 
+    readId : async (req, res) => {
+        try {
+            const { userId } = req.params
+            const user = await User.findOne({
+                where : {
+                    id : userId
+                }
+            })
+            return res.status(202).json({ user })
+        } catch (error) {
+            return res.status(500).json({ message : "Terjadi kesalahan saat membaca data pengguna", error: error.message})
+        }
+    },
+
     update : async (req, res) => {
         try {
             const { userId } = req.params
             const { email, nama } = req.body
-            id ( !userId)
-            console.log(userId);
+            await User.update({
+                email,
+                nama
+            }, {
+                where : {
+                    id : userId
+                }
+            })
+            return res.status(202).json({ message : "Pengguna berhasil diupdate"})
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat mengupdate data pengguna", error: error.message })
         }
     },
 
     delete : async (req, res) => {
-
+        //Menghapus data pengguna di database
+        try {
+            const { userId } = req.params
+            await User.destroy({
+                where : {
+                    id : userId
+                }
+            })
+            return res.status(202).json({ message : "Pengguna berhasil dihapus"})
+        } catch (error) {
+            
+        }
     }
 }
