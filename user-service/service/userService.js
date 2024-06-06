@@ -3,6 +3,7 @@ const { User } = require('../models')
 module.exports = {
     createUser : async (userData) => {
         //membuat servis user create
+        // console.log(userData)
         try {
             const existingUser = await User.findOne({
                 where : {
@@ -18,7 +19,7 @@ module.exports = {
             throw error
         }
     },
-    getAllUsers : async (userData) => {
+    getAllUsers : async () => {
         //mendapatkan semua data user 
         try {
             const user = await User.findAll()
@@ -32,7 +33,7 @@ module.exports = {
         try {
             const user = await User.findOne({
                 where : {
-                    id : userData.id
+                    id : userData
                 }
             })
             if (!user) {
@@ -45,10 +46,11 @@ module.exports = {
     },
     updateUser : async (userData) => {
         //mengupdate data user berdasarkan id
+        console.log(userData.userId)
         try {
         const updatedUser = await User.update(userData, {
             where : {
-                id : userData.id
+                id : userData.userId
             }
         })
         } catch (error) {
@@ -60,7 +62,7 @@ module.exports = {
         try {
             const deletedUser = await User.destroy({
                 where : {
-                    id : userData.id
+                    id : userData
                 }
             })
             if (!deletedUser) {
