@@ -7,10 +7,12 @@ module.exports = {
     // Memasukkan data pengguna
     create : async (req, res) => {
         try {
+            const { userId } = req.params
             const { email, nama } = req.body;
-            body('email').isEmail().withMessage('Email tidak valid')
+            const dataUser = { email, nama, userId}
+            // body('email').isEmail().withMessage('Email tidak valid')
             body('nama').isLength({ min: 3 }).withMessage('Nama minimal 3 karakter')
-            const newUser = await service.createUser(email, nama)
+            const newUser = await service.createUser(dataUser)
             res.status(201).json({ message : "Pengguna berhasil ditambahkan", newUser })
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat memasukkan data pengguna", error: error.message })
@@ -40,9 +42,10 @@ module.exports = {
         try {
             const { userId } = req.params
             const { email, nama } = req.body
+            const dataUser = { email, nama, userId}
             body('email').isEmail().withMessage('Email tidak valid')
             body('nama').isLength({ min: 3 }).withMessage('Nama minimal 3 karakter')
-            const updatedUser = await service.updateUser(userId, email, nama)
+            const updatedUser = await service.updateUser(dataUser)
             return res.status(202).json({ message : "Pengguna berhasil diupdate", updatedUser })
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat mengupdate data pengguna", error: error.message })
