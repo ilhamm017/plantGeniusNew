@@ -1,11 +1,12 @@
 {
   "development": {
     "username": "thouka",
-    "password": "18062018",
+    "password": "180618",
     "database": "database_development",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "postgres"
   },
+
   "test": {
     "username": "root",
     "password": null,
