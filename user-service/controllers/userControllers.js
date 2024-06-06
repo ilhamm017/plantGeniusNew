@@ -1,4 +1,6 @@
 const { User } = require('../models')
+const service = require('../service/userService')
+const { body, validationResult } = require('express-validator');
 
 
 module.exports = {
@@ -6,23 +8,10 @@ module.exports = {
     create : async (req, res) => {
         try {
             const { email, nama } = req.body;
-        // cek apakah pengguna sudah terdaftar 
-        const existingUser = await User.findOne({ where : { email }})
-        if(existingUser) {
-            // Jika pengguna sudah ada di dalam database 
-            return res.status(400).json({ message : "Pengguna sudah terdaftar!"})
-        }
-        // Membuat pengguna baru di database
-        User.create({
-            email,
-            nama
-        }).then( user => { 
-            // Jika memasukkan pengguna berhasil maka akan mengembalikan response code 202
-            return res.status(202).json({ message : "Pendaftaran berhasil"})
-        }).catch( error => {
-            // Jika terjadi kesalahan saat memasukkan data pengguna akan mengembalikan error
-            throw new Error("Gagal mendaftarkan pengguna")
-        }) 
+            body('email').isEmail().withMessage('Email tidak valid')
+            body('nama').isLength({ min: 3 }).withMessage('Nama minimal 3 karakter')
+            const newUser = await service.createUser(email, nama)
+            res.status(201).json({ message : "Pengguna berhasil ditambahkan", newUser })
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat memasukkan data pengguna", error: error.message })
         }
@@ -30,40 +19,31 @@ module.exports = {
     // Membaca data pengguna di database
     read : async (req, res) => {
         try {
-            const user = await User.findAll()
-            return res.status(202).json({ user })
+            const allUsers = await service.getAllUsers()
+            return res.status(202).json({ allUsers })
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat membaca data pengguna", error: error.message})
         }
     },
-
+    // Membaca data pengguna berdasarkan id di database
     readId : async (req, res) => {
         try {
             const { userId } = req.params
-            const user = await User.findOne({
-                where : {
-                    id : userId
-                }
-            })
-            return res.status(202).json({ user })
+            const userById = await service.getUserById(userId)
+            return res.status(202).json({ userById })
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat membaca data pengguna", error: error.message})
         }
     },
-
+    // Mengupdate data pengguna di database
     update : async (req, res) => {
         try {
             const { userId } = req.params
             const { email, nama } = req.body
-            await User.update({
-                email,
-                nama
-            }, {
-                where : {
-                    id : userId
-                }
-            })
-            return res.status(202).json({ message : "Pengguna berhasil diupdate"})
+            body('email').isEmail().withMessage('Email tidak valid')
+            body('nama').isLength({ min: 3 }).withMessage('Nama minimal 3 karakter')
+            const updatedUser = await service.updateUser(userId, email, nama)
+            return res.status(202).json({ message : "Pengguna berhasil diupdate", updatedUser })
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat mengupdate data pengguna", error: error.message })
         }
@@ -73,14 +53,10 @@ module.exports = {
         //Menghapus data pengguna di database
         try {
             const { userId } = req.params
-            await User.destroy({
-                where : {
-                    id : userId
-                }
-            })
+            const deletedUser = await service.deleteUser(userId)
             return res.status(202).json({ message : "Pengguna berhasil dihapus"})
         } catch (error) {
-            
+            return res.status(500).json({ message : "Terjadi kesalahan saat menghapus data pengguna"})
         }
     }
 }

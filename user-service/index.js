@@ -1,8 +1,7 @@
 const express = require('express');
 const app = express()
 const route = require('./routes/routes')
-const port = 3000 // Ubah env port ketika sudah selesai 
-
+const port = process.env.PORT || 3000
 app.use(express.json())
 app.use(express.urlencoded({ extended: false}))
 
