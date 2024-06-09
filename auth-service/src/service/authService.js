@@ -2,7 +2,7 @@ const { UserAuth } = require('../models')
 const Hash = require('../helpers/Hash')
 const Jwt = require('../helpers/Jwt')
 const { callExternalApi } = require('../service/apiClientService')
-
+const Url = 'http://localhost:3000/user/create'
 
 module.exports = {
     create : async (userData) => {
@@ -15,15 +15,28 @@ module.exports = {
             if (existingUser) {
                 throw new Error('User already exists')  
             }
-            const newUser = await UserAuth.create(userData)
-            const response = await callExternalApi('http://localhost:3000/user/create', 'post', userData)
-            return response
-        } catch (error) { 
-            await UserAuth.destroy({
-                where: {
-                    email: userData.email
-                }
+            const hashedPassword = Hash.hashPassword(userData.password)
+            const newUser = await UserAuth.create({
+                email : userData.email,
+                password : hashedPassword
             })
+            const response = await callExternalApi(Url,'post',{
+                email : userData.email,
+                nama : userData.nama
+            })
+            if (response.status !== 201) {
+                await UserAuth.destroy({
+                where: {
+                        email: userData.email
+                    }
+                })
+                throw new Error('Failed to create user')
+            }
+            return {
+                newUser,
+                response
+            }
+        } catch (error) { 
             throw error
         }
     },
