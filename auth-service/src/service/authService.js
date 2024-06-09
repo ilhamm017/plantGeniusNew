@@ -1,7 +1,7 @@
 const { UserAuth } = require('../models')
 const Hash = require('../helpers/Hash')
 const Jwt = require('../helpers/Jwt')
-const callExternalApi = require('../service/apiClientService')
+const { callExternalApi } = require('../service/apiClientService')
 
 
 module.exports = {
@@ -19,6 +19,11 @@ module.exports = {
             const response = await callExternalApi('http://localhost:3000/user/create', 'post', userData)
             return response
         } catch (error) { 
+            await UserAuth.destroy({
+                where: {
+                    email: userData.email
+                }
+            })
             throw error
         }
     },

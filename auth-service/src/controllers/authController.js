@@ -1,39 +1,14 @@
 const { UserAuth } = require('../models')
-const Hash = require('../helpers/Hash')
-const Jwt = require('../helpers/Jwt')
+const service = require('../service/authService')
+
+
 module.exports = {
 // Registrasii pengguna
 register: async (req, res) => {
     try {
-        let { email, password } = req.body;
-        // Cek apakah email sudah terdaftar
-        const existingUser = await UserAuth.findOne({ where: { email } });
-        if (existingUser) {
-            // Jika pengguna sudah ada, mengembalikan status "Email sudah terdaftar"
-            return res.status(400).json({ message: "Email sudah terdaftar" });
-        }
-        // Membuat pengguna baru
-        /*password = await Hash.hashPassword(password)
-        const newUser = await UserAuth.create({
-            email,
-            // Enkripsi password sebelum menyimpan ke database
-            password,
-        });*/
-        // Enkripsi password sebelum disimpan ke database
-        Hash.hashPassword(password).then( password => {
-            // Membuat pengguna baru di database
-            UserAuth.create({
-                email,
-                password
-            })
-            // Jika terjadi error, mengembalikan error
-        }).catch( error => {
-            throw new Error('Gagal mendaftarkan pengguna')
-        })
-        // Mendaftarkan pengguna ke User-service
-        // TODO*
-        //Mengembalikan respon berhasil ketika sudah memasukkan data pengguna ke database
-        return res.status(201).json({ message: "Pengguna berhasil didaftarkan" });
+        let userData = req.body
+        const addUser = await service.create(userData)
+        return res.status(201).json({ message: "Pengguna berhasil ditambahkan"})
     } catch (error) {
         // Mengembalikan respon error ketika terjadi error
         console.error(`Error saat mendaftarkan pengguna: ${error}`);

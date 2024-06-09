@@ -18,8 +18,8 @@ module.exports = {
       password: {
         type: Sequelize.STRING
       },
-      nama: {
-        type: sequelize.STRING
+      nama : {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
