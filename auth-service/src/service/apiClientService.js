@@ -39,7 +39,7 @@ module.exports = {
                 url,
                 data
             })
-            return response.data
+            return response
         } catch (error) {
             console.error("Error:", error);
             throw new Error("Failed to call external API")

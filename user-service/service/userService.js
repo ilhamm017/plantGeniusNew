@@ -3,7 +3,6 @@ const { User } = require('../models')
 module.exports = {
     createUser : async (userData) => {
         //membuat servis user create
-        // console.log(userData)
         try {
             const existingUser = await User.findOne({
                 where : {

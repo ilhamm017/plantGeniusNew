@@ -1,4 +1,5 @@
 const { UserAuth } = require('../models')
+const { sequelize } = require('../models')
 const Hash = require('../helpers/Hash')
 const Jwt = require('../helpers/Jwt')
 const { callExternalApi } = require('../service/apiClientService')
@@ -13,29 +14,29 @@ module.exports = {
                 }
             })
             if (existingUser) {
-                throw new Error('User already exists')  
+                throw new Error('User already exist')
             }
-            const hashedPassword = Hash.hashPassword(userData.password)
-            const newUser = await UserAuth.create({
-                email : userData.email,
-                password : hashedPassword
-            })
-            const response = await callExternalApi(Url,'post',{
-                email : userData.email,
-                nama : userData.nama
-            })
-            if (response.status !== 201) {
-                await UserAuth.destroy({
-                where: {
-                        email: userData.email
-                    }
+            const hashedPassword = await Hash.hashPassword(userData.password)
+            const transaction = await sequelize.transaction(async t => {
+                const newUser = await UserAuth.create({
+                    email : userData.email,
+                    password : hashedPassword
+                },{
+                    transaction: t
+                }) 
+                const response = await callExternalApi(Url,'post',{
+                    email : userData.email,
+                    nama : userData.nama,
+                    userId : newUser.dataValues.id
                 })
-                throw new Error('Failed to create user')
-            }
-            return {
-                newUser,
-                response
-            }
+                console.log(response.data)
+                console.log(newUser)
+                if (response.status !== 201) {
+                    throw new Error('Failed to create user')
+                }
+                return response.data
+            })
+            console.log(transaction)
         } catch (error) { 
             throw error
         }

@@ -8,7 +8,7 @@ register: async (req, res) => {
     try {
         let userData = req.body
         const addUser = await service.create(userData)
-        return res.status(201).json({ message: "Pengguna berhasil ditambahkan"})
+        return res.status(201).json({ message: "Pengguna berhasil ditambahkan" })
     } catch (error) {
         // Mengembalikan respon error ketika terjadi error
         console.error(`Error saat mendaftarkan pengguna: ${error}`);
