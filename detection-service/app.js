@@ -1,6 +1,6 @@
 const tf = require('@tensorflow/tfjs-node')
 const fs = require( 'fs' ).promises
-const modelPath = './saved_model'
+const modelPath = './saved_model/model.json'
 const disease_class = ['Banana cordana', 'Banana healthy', 'Banana pestalotiopsis', 'Banana sigatoka', 'Cacao black pod rot',
 'Cacao healthy', 'Cacao pod borer', 'Cassava brown leaf spot', 'Cassava brown streak disease',
 'Cassava green mottle', 'Cassava healthy', 'Cassava mosaic disease', 'Cassava resistance marker',
@@ -17,11 +17,12 @@ const disease_class = ['Banana cordana', 'Banana healthy', 'Banana pestalotiopsi
 'Tomato septoria leaf spot', 'Tomato spider mites', 'Tomato target spot', 'Tomato mosaic virus',
 'Tomato yellow leaf curl virus', 'Tomato healthy', 'Potato hollow heart']
 
+let model
 async function loadModel() {
     try {
-        const model = await tf.loadSavedModel(modelPath)
-        console.log('Model berhasil dimuat!')
-        return model
+        model = await tf.loadLayersModel(`file:///${__dirname}/saved_model/model.json`);
+        console.log('Model berhasil dimuat!');
+        return model;
     } catch (error) {
         console.error('Gagal memuat model:', error)
     }
@@ -51,6 +52,13 @@ async function predictDisease(imagePath) {
     }
 }
 
-loadModel().then((model) => {
-    global.model = model
-})
+(async () => {
+    const imagePath = './images.jpeg'; // Path gambar
+    loadModel()
+    try {
+      const predictedDisease = await predictDisease(imagePath);
+      console.log('Penyakit yang diprediksi:', predictedDisease);
+    } catch (error) {
+      console.error('Terjadi kesalahan:', error);
+    }
+  })();
