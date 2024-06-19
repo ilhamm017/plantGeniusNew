@@ -1,105 +1,312 @@
-## Endpoint untuk Setiap Service pada Aplikasi Pendeteksi Penyakit Tanaman:
- 
- **Auth Service (/auth)**
 
--   **POST /register:** Registrasi user baru.
-    
-    -   **Request Body:** Email, password, nama.
-        
-    -   **Response:** User ID & Pesan Berhasil(jika berhasil), pesan error (jika gagal).
-        
--   **POST /login:** Autentikasi user.
-    
-    -   **Request Body:** Email, password.
-        
-    -   **Response:** JWT (jika berhasil), pesan error (jika gagal).
-        
-**User Service (/users)**
+# API Documentation: Plant Disease Detection App
 
--   **POST /create** Membuat data profil user baru (dipanggil oleh Auth Service).
-    
-    -   **Request Body:** Email, Nama.
-        
-    -   **Response:** Data user (ID, email, nama.).
+## Autentikasi
 
--   **GET /** Mengambil semua data user yang terdaftar.
-        
-    -   **Response:** Data user (ID, email, nama).
+### Auth Service (/auth)
 
--   **GET /:userId:** Mengambil data profil user yang sedang login.
-    
-    -   **Headers:** Authorization: Bearer
-        
-    -   **Response:** Data user (ID, email, nama, dll.).
-        
--   **PUT /:userId:** Mengubah data profil user.
-    
-    -   **Headers:** Authorization: Bearer
-        
-    -   **Request Body:** Data user yang ingin diubah (nama, email, password).
-        
-    -   **Response:** Data user yang sudah diperbarui.
-        
--   **GET /:userId:/history:** Mengambil riwayat deteksi user.
-    
-    -   **Headers:** Authorization: Bearer
-        
-    -   **Response:** Array data riwayat deteksi.
-        
--   **GET /:userId:** Mengambil data profil user yang sedang login.
-    
-    -   **Headers:** Authorization: Bearer
-        
-    -   **Response:** Data user (ID, email, nama, dll).
+#### POST /auth/register
 
--   **DELETE/:userId:** Menghapus data user yang sedang login.
-    
-    -   **Headers:** Authorization: Bearer
-        
-    -   **Response:** Pesan berhasil menghapus data user.
+**Deskripsi:** Mendaftarkan pengguna baru.
 
-**Image Upload Service (/images)**
+**Request Body:**
 
--   **POST /upload:** Mengunggah gambar tanaman.
-    
-    -   **Headers:** Authorization: Bearer
-        
-    -   **Request Body:** File gambar (multipart/form-data).
-        
-    -   **Response:** Hasil deteksi penyakit tanaman, pesan error (jika gagal).
-        
+| Parameter | Tipe Data | Deskripsi                |
+| --------- | --------- | -------------------------- |
+| email     | string    | Alamat email yang valid   |
+| password  | string    | Kata sandi                |
+| nama      | string    | Nama lengkap pengguna     |
 
-**Detection Service (/detection)**
+**Response (201 Created):**
 
--   **POST /analyze:** Menganalisis gambar tanaman (dipanggil oleh Image Upload Service).
-    
-    -   **Request Body:** File gambar.
-        
-    -   **Response:** Hasil analisis (jenis penyakit).
-        
+```json
+{
+  "message": "User berhasil terdaftar",
+  "userId": "1234" 
+}
+```
 
-**History Service (/history)**
+**Response (400 Bad Request):**
 
--   **POST /** Membuat riwayat baru setelah melakukan pendeteksian gambar (dipanggil oleh detection Service).
-    
-    -   **Headers:** Authorization: Bearer
-        
-    -   **Response:** Pesan history berhasil dibuat & Hasil analisis jenis penyakit.
+```json
+{
+  "message": "Email sudah terdaftar"
+}
+```
 
--   **GET /:userId:** Mengambil riwayat deteksi berdasarkan user ID (dipanggil oleh User Service).
-    
-    -   **Headers:** (Opsional) Authorization: Bearer (jika diperlukan otorisasi)
-        
-    -   **Response:** Array data riwayat deteksi untuk user tersebut.
+#### POST /auth/login
 
--   **GET /** Mengambil seluruh riwayat deteksi .
-    
-    -   **Headers:** (Opsional) Authorization: Bearer (jika diperlukan otorisasi)
-        
-    -   **Response:** Array data riwayat deteksi semua user.
+**Deskripsi:** Autentikasi pengguna.
 
--   **DELETE /:userId:** Menghapus riwayat deteksi berdasarkan user ID (dipanggil oleh User Service).
-    
-    -   **Headers:** Authorization: Bearer 
-        
-    -   **Response:** Pesan penghapusan berhasil, Pesan error (Jika gagal) 
+**Request Body:**
+
+| Parameter | Tipe Data | Deskripsi                |
+| --------- | --------- | -------------------------- |
+| email     | string    | Alamat email yang valid   |
+| password  | string    | Kata sandi                |
+
+**Response (200 OK):**
+
+```json
+{
+  "token": "your_jwt_token"
+}
+```
+
+**Response (401 Unauthorized):**
+
+```json
+{
+  "message": "Email atau password salah"
+}
+```
+
+## User Service (/users)
+
+#### POST /users/create
+
+**Deskripsi:** Membuat profil pengguna baru (dipanggil oleh Auth Service).
+
+**Headers:**
+
+* Authorization: Bearer <jwt_token>
+
+**Request Body:**
+
+| Parameter | Tipe Data | Deskripsi                |
+| --------- | --------- | -------------------------- |
+| email     | string    | Alamat email yang valid   |
+| nama      | string    | Nama lengkap pengguna     |
+
+**Response (201 Created):**
+
+```json
+{
+  "id": "1234",
+  "email": "user@example.com",
+  "nama": "Nama Pengguna"
+}
+```
+
+#### GET /users
+
+**Deskripsi:** Mengambil data semua pengguna (Admin Only).
+
+**Headers:**
+
+* Authorization: Bearer <jwt_token>
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": "1234",
+    "email": "user1@example.com",
+    "nama": "Nama Pengguna 1"
+  },
+  {
+    "id": "987",
+    "email": "user2@example.com",
+    "nama": "Nama Pengguna 2"
+  }
+]
+```
+
+#### GET /users/:userId
+
+**Deskripsi:** Mengambil data profil pengguna berdasarkan ID.
+
+**Headers:**
+
+* Authorization: Bearer <your_jwt_token>
+
+**Response (200 OK):**
+
+```json
+{
+  "id": "1234",
+  "email": "user@example.com",
+  "nama": "Nama Pengguna"
+}
+```
+
+#### PUT /users/:userId
+
+**Deskripsi:** Mengubah data profil pengguna.
+
+**Headers:**
+
+* Authorization: Bearer <jwt_token>
+
+**Request Body:**
+
+| Parameter | Tipe Data | Deskripsi                        |
+| --------- | --------- | ---------------------------------- |
+| nama      | string    | Nama lengkap pengguna (opsional) |
+| email     | string    | Alamat email (opsional)           |
+| password  | string    | Kata sandi (opsional)            |
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "Profil berhasil diperbarui"
+}
+```
+
+#### DELETE /users/:userId
+
+**Deskripsi:** Menghapus data pengguna.
+
+**Headers:**
+
+* Authorization: Bearer <your_jwt_token>
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "User berhasil dihapus"
+}
+```
+
+## Image Upload & Detection
+
+### Image Upload Service (/images)
+
+#### POST /images/upload
+
+**Deskripsi:** Mengunggah gambar tanaman untuk dideteksi.
+
+**Headers:**
+
+* Authorization: Bearer <jwt_token>
+* Content-Type: multipart/form-data
+
+**Request Body:**
+
+* `image`: File gambar
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "Gambar berhasil diunggah dan diproses",
+  "result": {
+    "disease": "Penyakit Busuk Daun"
+  }
+}
+```
+
+**Response (400 Bad Request):**
+
+```json
+{
+  "message": "Gagal memproses gambar."
+}
+```
+
+### Detection Service (/detection)
+
+#### POST /detection/analyze
+
+**Deskripsi:** Menganalisis gambar tanaman (dipanggil oleh Image Upload Service).
+
+**Request Body:**
+
+* File gambar (dikirim dari Image Upload Service)
+
+**Response:**
+
+* Hasil analisis (jenis penyakit) - dikirim kembali ke Image Upload Service
+
+## History Service (/history)
+
+#### POST /history
+
+**Deskripsi:** Membuat riwayat deteksi baru (dipanggil oleh Image Upload Service).
+
+**Headers:**
+
+* Authorization: Bearer <jwt_token>
+
+**Request Body:**
+
+| Parameter  | Tipe Data | Deskripsi                  |
+| ---------- | --------- | ---------------------------- |
+| userId     | string    | ID Pengguna               |
+| imageUrl   | string    | URL gambar yang diunggah  |
+| disease    | string    | Jenis penyakit yang terdeteksi|
+| accuracy   | float     | Tingkat akurasi deteksi  |
+
+**Response (201 Created):**
+
+```json
+{
+  "message": "Riwayat deteksi berhasil dibuat"
+}
+```
+
+#### GET /history/:userId
+
+**Deskripsi:** Mengambil riwayat deteksi berdasarkan user ID.
+
+**Headers:**
+
+* Authorization: Bearer <your_jwt_token>
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": "1",
+    "userId": "1234",
+    "imageUrl": "lokasi image",
+    "disease": "Penyakit Busuk Daun",
+    "createdAt": "2023-10-26T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "userId": "12345",
+    "imageUrl": "lokasi image",
+    "disease": "Penyakit Bercak Daun",
+    "createdAt": "2023-10-27T15:30:00Z"
+  }
+]
+```
+
+#### GET /history
+
+**Deskripsi:** Mengambil seluruh riwayat deteksi (Admin Only).
+
+**Headers:**
+
+* Authorization: Bearer <jwt_token>
+
+**Response (200 OK):**
+
+```json
+[
+  // ... (Similar structure to GET /history/:userId)
+]
+```
+
+#### DELETE /history/:historyId
+
+**Deskripsi:** Menghapus riwayat deteksi berdasarkan ID.
+
+**Headers:**
+
+* Authorization: Bearer <jwt_token>
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "Riwayat deteksi berhasil dihapus"
+}
+```
+
+
