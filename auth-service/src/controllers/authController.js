@@ -8,7 +8,10 @@ register: async (req, res) => {
     try {
         let userData = req.body
         const addUser = await service.create(userData)
-        return res.status(201).json({ message: "Pengguna berhasil ditambahkan" })
+        return res.status(201).json({ 
+            userId: addUser,
+            message: "Pengguna berhasil ditambahkan" 
+        })
     } catch (error) {
         // Mengembalikan respon error ketika terjadi error
         console.error(`Error saat mendaftarkan pengguna: ${error}`);
@@ -21,7 +24,7 @@ login: async (req, res) => {
         // Mendapatkan email dan passowrd dari body request
         const userData = req.body;
         const verifedUser = await service.login(userData)
-        return res.ststus(200).json({ message: "Berhasil login", data: verifedUser})
+        return res.ststus(200).json({ message: "Berhasil login", JWT: verifedUser})
     } catch (error) {
         // Jika terjadi error
         console.error(`Error saat login: ${error}`)

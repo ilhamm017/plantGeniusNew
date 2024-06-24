@@ -7,10 +7,21 @@
   # Use https://search.nixos.org/packages to find packages
   packages = [
     # pkgs.go
-    # pkgs.python311
-    # pkgs.python311Packages.pip
-    # pkgs.nodejs_20
-    # pkgs.nodePackages.nodemon
+    # python
+    pkgs.python311
+    pkgs.python311Packages.pip
+    pkgs.python311Packages.tensorflow
+
+    pkgs.python311Packages.flake8   # Linter Python
+    pkgs.python311Packages.black    # Formatter kode Python 
+    pkgs.python311Packages.autopep8 # Formatter Python alternatif
+
+    # nodejs
+    pkgs.nodejs_20
+    pkgs.nodePackages.nodemon
+    pkgs.nodePackages.eslint        # Linter JavaScript
+    pkgs.nodePackages.prettier      # Formatter kode JavaScript
+
   ];
 
   # Sets environment variables in the workspace
@@ -19,6 +30,14 @@
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
       # "vscodevim.vim"
+      # Python
+      "ms-python.python"             # Ekstensi Python resmi dari Microsoft
+      "ms-python.vscode-pylance"    # Language Server Protocol (LSP) untuk Python
+      "njpwerner.autodocstring"      # Membuat docstring otomatis
+
+      # Node.js
+      "dbaeumer.vscode-eslint"       # Integrasi ESLint
+      "esbenp.prettier-vscode"       # Integrasi Prettier
     ];
 
     # Enable previews
