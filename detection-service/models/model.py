@@ -33,8 +33,9 @@ async def predict_disease(image: bytes) -> str:
     x = np.expand_dims(x, axis=0)
     x = x / 255.0
 
+
     pred = model(x)
     index = np.argmax(pred)
-    pred_diseases = disease_class[index]
+    pred_diseases = diseases_class[index]
 
-    return pred_disease
+    return pred_diseasesTom

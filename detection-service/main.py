@@ -1,8 +1,8 @@
-from fastapi import fastapi
+from fastapi import FastAPI
 from api.predict import router as predict_router
 
 #membuat instance aplikasi FastAPI
-app = fastapi(
+app = FastAPI(
     title="service detection plantGenius",
     version="0.0.1"
 )

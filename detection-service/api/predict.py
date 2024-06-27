@@ -1,8 +1,8 @@
-from typing import list
+from typing import List
 import io
 import base64
-from fastapi import APIRouter, UploadFile, File 
-from fastapi.response import JSONResponse
+from fastapi import  APIRouter, Request
+from fastapi.responses import JSONResponse
 from models.model import predict_disease
 from schemas import PredictionResponse 
 

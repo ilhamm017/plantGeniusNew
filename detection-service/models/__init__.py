@@ -1,1 +1,1 @@
-from .model import load_model, predict_disease, init_model
+from .model import predict_disease
