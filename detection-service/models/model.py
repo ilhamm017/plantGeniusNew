@@ -38,4 +38,4 @@ async def predict_disease(image: bytes) -> str:
     index = np.argmax(pred)
     pred_diseases = diseases_class[index]
 
-    return pred_diseasesTom
+    return pred_diseases
