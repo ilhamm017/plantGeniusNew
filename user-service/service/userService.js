@@ -10,7 +10,7 @@ module.exports = {
                 }
             })
             if (existingUser) {
-                throw new Error('User already exists')
+                throw new Error('Pengguna sudah terdaftar!')
             }
             const newUser = await User.create(userData)
             return newUser

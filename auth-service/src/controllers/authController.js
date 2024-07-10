@@ -1,11 +1,10 @@
-const { UserAuth } = require('../models')
 const service = require('../service/authService')
-
 
 module.exports = {
 // Registrasii pengguna
 register: async (req, res) => {
     try {
+        // Mendapatkan email, password, nama dari body 
         let userData = req.body
         const addUser = await service.create(userData)
         return res.status(201).json({ 
@@ -24,7 +23,7 @@ login: async (req, res) => {
         // Mendapatkan email dan passowrd dari body request
         const userData = req.body;
         const verifedUser = await service.login(userData)
-        return res.ststus(200).json({ message: "Berhasil login", JWT: verifedUser})
+        return res.ststus(200).json({ token: verifedUser })
     } catch (error) {
         // Jika terjadi error
         console.error(`Error saat login: ${error}`)

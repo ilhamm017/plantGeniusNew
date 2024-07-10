@@ -7,12 +7,14 @@ module.exports = {
     // Memasukkan data pengguna
     create : async (req, res) => {
         try {
+            //Mendapatkan data dari body request
             const dataUser = req.body
-            // body('email').isEmail().withMessage('Email tidak valid')
-            // body('nama').isLength({ min: 3 }).withMessage('Nama minimal 3 karakter')
-            // TODO *Perbaikan validator 
             const newUser = await service.createUser(dataUser)
-            res.status(201).json({ message : "Pengguna berhasil ditambahkan", newUser })
+            res.status(201).json({ 
+                id : newUser.id,
+                email : newUser.email,
+                nama : newUser.nama
+             })
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat memasukkan data pengguna", error: error.message })
         }

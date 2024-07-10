@@ -14,7 +14,7 @@ module.exports = {
                 }
             })
             if (existingUser) {
-                throw new Error('User already exist')
+                throw new Error('Email sudah terdaftar!')
             }
             const hashedPassword = await Hash.hashPassword(userData.password)
             const transaction = await sequelize.transaction(async t => {
@@ -32,7 +32,7 @@ module.exports = {
                 console.log(response.data)
                 console.log(newUser)
                 if (response.status !== 201) {
-                    throw new Error('Failed to create user')
+                    throw new Error('Gagal menambahkan pengguna!')
                 }
                 return response.data
             })
@@ -49,16 +49,16 @@ module.exports = {
                 }
             })
             if (!user) {
-                throw new Error('User not found')
+                throw new Error('Email salah!!')
             }
             const isPasswordCorrect = await Hash.comparePassword(userData.password, user.password)
             if (!isPasswordCorrect) {
-                throw new Error('Password is incorrect')
+                throw new Error('Password salah!!')
             }
-            const token = await Jwt.sign({ id: user.id, email: user.email})
+            const token = await Jwt.sign({ id: user.id, email: user.email })
             return token
         } catch (error) {
-            
+            throw error
         }
     }
 }
