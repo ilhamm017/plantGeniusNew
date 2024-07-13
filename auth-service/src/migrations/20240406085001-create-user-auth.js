@@ -13,10 +13,16 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true 
+        }
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -26,7 +32,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
+    });    
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('UserAuths');

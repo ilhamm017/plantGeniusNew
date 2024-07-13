@@ -10,7 +10,8 @@ const CircuitBreakerOption = {
 
 const axiosCircuitBreaker = new CircuitBreaker(axios, CircuitBreakerOption);
 
-// Implementasi event
+// ============================ IMPLEMENTASI EVENT ===============================
+
 axiosCircuitBreaker.on('open', () => {
   console.warn('Circuit breaker is now open. Requests will be rejected.');
 });
