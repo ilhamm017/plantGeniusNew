@@ -8,8 +8,8 @@ register: async (req, res) => {
         let userData = req.body
         const addUser = await service.create(userData)
         return res.status(201).json({ 
-            userId: addUser,
-            message: "Pengguna berhasil ditambahkan" 
+            message: "Pengguna berhasil ditambahkan",
+            userId: addUser.userId
         })
     } catch (error) {
         // Mengembalikan respon error ketika terjadi error
@@ -27,7 +27,10 @@ login: async (req, res) => {
     } catch (error) {
         // Jika terjadi error
         console.error(`Error saat login: ${error}`)
-        return res.status(500).json({ message: "terjadi kesalahan saat login"})
+        return res.status(500).json({ 
+            message: "terjadi kesalahan saat login",
+            error: error.message
+        })
     }
 }
 }

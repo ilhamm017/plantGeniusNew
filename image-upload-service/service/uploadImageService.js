@@ -9,7 +9,7 @@ const CircuitBreakerOption = {
 }
 
 const axiosCircuitBreaker = new CircuitBreaker(axios, CircuitBreakerOption) 
-// Implementasi event
+// ============================== Implementasi event ==============================
 axiosCircuitBreaker.on('open', () => {
     console.warn('Circuit breaker is now open. Requests will be rejected.');
   });
@@ -35,7 +35,7 @@ module.exports = {
         try {
             const response = await axiosCircuitBreaker.fire({
                 method: method.toLowerCase(),
-                url,
+                url: url,
                 data : {
                     image : base64Image
                 }
@@ -49,7 +49,7 @@ module.exports = {
             return response.data
         } catch (error) {
             console.error("Error:", error);
-            throw new Error("Failed to call external API")
+            throw new Error("Gagal mengupload gambar")
         }
     }
 }

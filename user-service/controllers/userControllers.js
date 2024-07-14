@@ -1,7 +1,5 @@
 const { User } = require('../models')
 const service = require('../service/userService')
-const { body, validationResult } = require('express-validator');
-
 
 module.exports = {
     // Memasukkan data pengguna
@@ -11,12 +9,14 @@ module.exports = {
             const dataUser = req.body
             const newUser = await service.createUser(dataUser)
             res.status(201).json({ 
-                id : newUser.id,
-                email : newUser.email,
-                nama : newUser.nama
+                message : "Pengguna berhasil ditambahkan",
+                userId : newUser.userId
              })
         } catch (error) {
-            return res.status(500).json({ message : "Terjadi kesalahan saat memasukkan data pengguna", error: error.message })
+            return res.status(500).json({ 
+                message : "Terjadi kesalahan saat memasukkan data pengguna", 
+                error: error.message
+            })
         }
     },
     // Membaca data pengguna di database
@@ -25,7 +25,10 @@ module.exports = {
             const allUsers = await service.getAllUsers()
             return res.status(202).json({ allUsers })
         } catch (error) {
-            return res.status(500).json({ message : "Terjadi kesalahan saat membaca data pengguna", error: error.message})
+            return res.status(500).json({
+                message : "Terjadi kesalahan saat membaca data pengguna", 
+                error: error.message
+            })
         }
     },
     // Membaca data pengguna berdasarkan id di database
@@ -35,7 +38,10 @@ module.exports = {
             const userById = await service.getUserById(userId)
             return res.status(202).json({ userById })
         } catch (error) {
-            return res.status(500).json({ message : "Terjadi kesalahan saat membaca data pengguna", error: error.message})
+            return res.status(500).json({
+                message : "Terjadi kesalahan saat membaca data pengguna",
+                error: error.message
+            })
         }
     },
     // Mengupdate data pengguna di database
@@ -43,13 +49,17 @@ module.exports = {
         try {
             const { userId } = req.params
             const { email, nama } = req.body
-            const dataUser = { email, nama, userId}
-            body('email').isEmail().withMessage('Email tidak valid')
-            body('nama').isLength({ min: 3 }).withMessage('Nama minimal 3 karakter')
+            const dataUser = { email, nama, userId }
             const updatedUser = await service.updateUser(dataUser)
-            return res.status(202).json({ message : "Pengguna berhasil diupdate", updatedUser })
+            return res.status(202).json({
+                message : "Pengguna berhasil diperbarui", 
+                dataUser : updatedUser 
+            })
         } catch (error) {
-            return res.status(500).json({ message : "Terjadi kesalahan saat mengupdate data pengguna", error: error.message })
+            return res.status(500).json({
+                message : "Terjadi kesalahan saat mengupdate data pengguna",
+                error: error.message
+            })
         }
     },
 

@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 6000
 const route = require('./routes/routes')
 
 app.use(express.json())

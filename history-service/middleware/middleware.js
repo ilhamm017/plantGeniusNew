@@ -1,6 +1,5 @@
 //Middleware untuk validasi token jwt user 
 const helper = require('../helpers/Jwt')
-const { User } = require('../models')
 
 module.exports = {
     authenticationMiddleware : async (req, res, next) => {
@@ -11,16 +10,8 @@ module.exports = {
             if (tokenParts.length !== 3) {
                 return res.status(401).json({ message: 'Token tidak valid'})
             }
+            const [bearer, token] = tokenParts
             const { id, email } = helper.verify(authHeader)
-            const user = await User.findOne({
-                where : {
-                    id : id,
-                    email : email
-                }
-            })
-            if (!user) {
-                return res.status(401).json({ message: 'Token tidak valid'})
-            }
             req.user = {id, email}
             next()
         } catch (error) {

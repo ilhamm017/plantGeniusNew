@@ -1,51 +1,63 @@
 const { History } = require('../models');
+const service = require('../service/historyService')
 
 module.exports = {
 // Membuat hostroy baru
 createHistory : async (req, res) => {
   try {
-    
-    const newHistory = await History.create(req.body);
-    res.status(201).json(newHistory);
+    const newHistory = req.body
+    const userId = req.user.id
+    const addHistory = await service.createHistory(newHistory, userId)
+    res.ststus(201).json({ 
+      message: "Riwayat deteksi berhasil dibuat" 
+    })
   } catch (error) {
-    res.status(500).json({ error: 'Gagal dalam membuat history' });
+    res.status(500).json({ 
+      error: 'Gagal dalam membuat history',
+      message: error.message
+    });
   }
 },
-
 // Mendapatkan semua history 
 getAllHistory : async (req, res) => {
   try {
-    const historyEntries = await History.findAll();
-    res.status(200).json(historyEntries);
+    const allHistory = await service.getAllHistory()
+    res.status(200).json(allHistory);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to get history entries' });
+    res.status(500).json({ 
+      error: 'Gagal dalam mendapatkan semua history',
+      message: error.message
+    });
   }
 },
 
 // Mendapatkan hostroy berdasarkan ID
 getHistoryById : async (req, res) => {
   try {
-    const historyEntry = await History.findByPk(req.params.id);
-    if (!historyEntry) {
-      return res.status(404).json({ error: 'History entry not found' });
-    }
-    res.status(200).json(historyEntry);
+    const userId = req.user.id
+    const userHistory = await service.getHistoryById(userId)
+    res.status(200).json(userHistory);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to get history entry' });
+    res.status(500).json({ 
+      error: 'Gagal dalam mendapatkan history berdasarkan ID',
+      message: error.message
+     });
   }
 },
 
 // hapus history berdasarkan ID
 deleteHistory : async (req, res) => {
   try {
-    const historyEntry = await History.findByPk(req.params.id);
-    if (!historyEntry) {
-      return res.status(404).json({ error: 'History entry not found' });
-    }
-    await historyEntry.destroy();
-    res.status(204).json();
+    const historyId = req.user.id
+    const deleteHistory = await service.deleteHistory(historyId)
+    res.status(204).json({ 
+      message: "Riwayat deteksi berhasil dihapus" 
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete history entry' });
+    res.status(500).json({ 
+      error: 'Gagal dalam menghapus history',
+      message: error.message
+    });
   }
 }
 

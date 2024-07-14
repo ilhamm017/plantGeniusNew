@@ -14,9 +14,24 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   History.init({
-    userId: DataTypes.INTEGER,
-    imageUrl: DataTypes.STRING,
-    diseaseName: DataTypes.STRING
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isInt: {
+          msg: "UserId harus berupa angka"
+        }
+      }
+    },
+    diseaseName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: "Nama penyakit tidak boleh kosong"
+        }
+      }
+    }
   }, {
     sequelize,
     modelName: 'History',
