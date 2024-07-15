@@ -14,7 +14,8 @@ module.exports = {
             }
             const newUser = await User.create({
                 email : userData.email,
-                nama : userData.nama
+                nama : userData.nama,
+                userId : userData.userId
             })
             return newUser
         } catch (error) {

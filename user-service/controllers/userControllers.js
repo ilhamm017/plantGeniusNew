@@ -6,7 +6,9 @@ module.exports = {
     create : async (req, res) => {
         try {
             //Mendapatkan data dari body request
-            const dataUser = req.body
+            const userId = req.user.id
+            const { nama, email } = req.body
+            const dataUser = { userId, nama, email }
             const newUser = await service.createUser(dataUser)
             res.status(201).json({ 
                 message : "Pengguna berhasil ditambahkan",

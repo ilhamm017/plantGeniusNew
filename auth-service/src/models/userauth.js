@@ -14,8 +14,20 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   UserAuth.init({
-    email: DataTypes.STRING,
-    password: DataTypes.STRING
+    email: {
+      type: DataTypes.STRING,
+      allowNull:false,
+      unique: true,
+      validate: {
+        isEmail: {
+          msg:'Format email tidak valid'
+        }
+      }
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false, 
+    }
   }, {
     sequelize,
     modelName: 'UserAuth',

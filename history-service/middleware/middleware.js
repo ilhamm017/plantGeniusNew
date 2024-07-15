@@ -9,8 +9,7 @@ module.exports = {
             const tokenParts = authHeader.split('.')
             if (tokenParts.length !== 3) {
                 return res.status(401).json({ message: 'Token tidak valid'})
-            }
-            const [bearer, token] = tokenParts
+            } 
             const { id, email } = helper.verify(authHeader)
             req.user = {id, email}
             next()

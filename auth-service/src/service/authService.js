@@ -9,6 +9,7 @@ const Url = process.env.USER_SERVICE_URL
 module.exports = {
     //Menambahkan pengguna
     create : async (userData) => {
+        let transaction = null
         try {
             //Mengecek user dengan email yang sama
             const existingUser = await UserAuth.findOne({
@@ -22,7 +23,7 @@ module.exports = {
             //Melakukan hashing password
             const hashedPassword = await Hash.hashPassword(userData.password)
             //Memulai transaksi menambahkan data pengguna
-            const transaction = await sequelize.transaction(async t => {
+            transaction = await sequelize.transaction(async t => {
                 //MEnambahkan pengguna ke database
                 const newUser = await UserAuth.create({
                     email : userData.email,
@@ -36,8 +37,6 @@ module.exports = {
                     nama : userData.nama,
                     userId : newUser.dataValues.id
                 })
-                console.log(response.data)
-                console.log(newUser)
                 if (response.status !== 201) {
                     throw new Error('Gagal menambahkan pengguna!')
                 }
@@ -46,8 +45,10 @@ module.exports = {
             console.log(transaction)
         } catch (error) { 
             //Jika terjadi error, batalkan transaksi
-            console.error(`Error saat menambahkan pengguna: ${error}`)
-            await t.rollback();
+            console.error(`Error saat menambahkan pengguna: ${error.message}`)
+            if (transaction) {
+                await transaction.rollback();
+            }
             throw error
         }
     },
