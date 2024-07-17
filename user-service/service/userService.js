@@ -1,4 +1,6 @@
-const { User } = require('../models')
+const { User, sequelize } = require('../models')
+const { callExternalApi } = require('../service/apiClientService')
+require('dotenv').config();
 
 module.exports = {
     createUser : async (userData) => {
@@ -34,16 +36,20 @@ module.exports = {
             throw error
         }  
     },
-    getUserById : async (userData) => {
+    getUserById : async (userId, tokenUserId) => {
         //mendapatkan data user berdasarkan id
         try {
+            console.log(userId, tokenUserId)
             const user = await User.findOne({
                 where : {
-                    id : userData
+                    id : userId
                 }
             })
             if (!user) {
                 throw new Error('Pengguna tidak ditemukan!')
+            }
+            if (userId != tokenUserId) {
+                throw new Error('Token tidak sesuai')
             }
             return user
         } catch (error) {
@@ -51,34 +57,97 @@ module.exports = {
         }
     },
     updateUser : async (userData) => {
+        let transaction = null
         //mengupdate data user berdasarkan id
-        console.log(userData.userId)
         try {
-        const updatedUser = await User.update(userData, {
-            where : {
-                id : userData.userId
+        const user = await User.findOne({
+            where: {
+                id: userData.userId
             }
         })
-        if (updatedUser[0] === 0) {
-            return new Error('Pengguna tidak ditemukan!')
+        if (!user) {
+            throw new Error('Pengguna tidak ditemukan!')
         }
+        if (userData.userId != userData.tokenUserId) {
+            throw new Error('Token tidak sesuai')
+        }
+
+            transaction = await sequelize.transaction(async t => {
+            //Memperbarui data pengguna di User service
+            const updatedUser = await User.update({
+                ...(userData.nama ? { nama: userData.nama } : {}),
+                ...(userData.email ? { email: userData.email } : {})
+            },{
+                where : {
+                    id : userData.userId
+                },
+                transaction: t
+            })
+           
+            if (updatedUser[0] === 0) {
+                throw new Error('Update gagal!')
+            }
+            if (userData.email) {
+                //Memperbarui data pengguna di Auth service
+                const updatedUserService = await callExternalApi(process.env.USER_SERVICE_URL,`/auth/${userData.tokenUserId}`, 'PUT', {
+                email : userData.email
+                }, userData.token)
+                if (!updatedUserService) {
+                    throw new Error('Gagal memperbarui data di Auth service')
+                }
+            }
+            return {
+                message: 'Berhasil memperbarui data'
+            }
+        })
         } catch (error) {
+            console.error(`Error saat menambahkan pengguna: ${error.message}`)
+            if (transaction) {
+                await transaction.rollback()
+            }
             throw error
         }
     },
-    deleteUser : async (userData) => {
+    deleteUser : async (userId, tokenUserId, token) => {
         //menghapus data user berdasarkan id
+        let transaction = null
         try {
-            const deletedUser = await User.destroy({
+            const user = await User.findOne({
                 where : {
-                    id : userData
+                    id : userId
                 }
             })
-            if (!deletedUser) {
-                throw new Error('Pengguna tidak ditemukan!')
+            if (!user) {
+                throw new Error('pengguna tidak ditemukan')
             }
-            return deletedUser
+            console.log(userId, tokenUserId)
+            if (user.userId != tokenUserId) {
+                throw new Error('Token tidak sesuai!')
+            }
+
+            transaction = await sequelize.transaction( async t => {
+                //Menghapus data pengguna
+                const deletedUser = await User.destroy({
+                    where : {
+                        id : userId
+                    },
+                    transaction : t
+                })
+                if (!deletedUser) {
+                    throw new Error('Gagal menghapus pengguna!')
+                }
+
+                const deletedUserAuth = await callExternalApi(process.env.USER_SERVICE_URL, `/auth/${tokenUserId}`, 'DELETE', {}, token)
+                if (!deletedUserAuth) {
+                    throw new Error('Gagal menghapus pengguna autentikasi!')
+                }
+                return deletedUserAuth
+            })
         } catch (error) {
+            console.error(`Error saat menghapus pengguna: ${error.message}`)
+            if (transaction) {
+                await transaction.rollback()
+            }
             throw error
         }
     }

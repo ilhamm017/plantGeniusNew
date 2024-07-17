@@ -54,6 +54,7 @@ module.exports = {
             throw new Error("Gagal mengupload gambar")
         }
     },
+
     createHistory : async (url,method,disease,userId,token) => {
       try {
           const response = await axiosCircuitBreaker.fire({
@@ -75,7 +76,12 @@ module.exports = {
           }
           return response
       } catch (error) {
-          console.error("Error", error.message)
+          if (error.code === 'ECONNREFUSED') {
+            console.error("Error", error.message)
+            const customError = new Error('Layanan history sedang tidak tersedia. Coba lagi nanti!')
+            customError.status = 503
+            throw customError
+          }
           throw error
       }
   }

@@ -39,7 +39,8 @@ module.exports = {
     readId : async (req, res) => {
         try {
             const { userId } = req.params
-            const userById = await service.getUserById(userId)
+            const tokenUserId = req.user.id
+            const userById = await service.getUserById(userId, tokenUserId)
             if (!userById) {
                 return res.status(404).json({ message : "Pengguna tidak ditemukan"})
             }
@@ -56,14 +57,12 @@ module.exports = {
         try {
             const { userId } = req.params
             const { email, nama } = req.body
-            const dataUser = { email, nama, userId }
+            const token = req.user.token
+            const tokenUserId = req.user.id
+            const dataUser = { email, nama, userId, tokenUserId, token}
             const updatedUser = await service.updateUser(dataUser)
-            if (!updatedUser) {
-                return res.status(404).json({ message : "Pengguna tidak ditemukan"})
-            }
             return res.status(202).json({
-                message : "Pengguna berhasil diperbarui", 
-                dataUser : updatedUser 
+                message : "Pengguna berhasil diperbarui" 
             })
         } catch (error) {
             return res.status(500).json({
@@ -77,13 +76,18 @@ module.exports = {
         //Menghapus data pengguna di database
         try {
             const { userId } = req.params
-            const deletedUser = await service.deleteUser(userId)
-            if (!deletedUser) {
-                return res.status(404).json({ message : "Pengguna tidak ditemukan"})
-            }
-            return res.status(202).json({ message : "Pengguna berhasil dihapus"})
+            const tokenUserId = req.user.id
+            const token = req.user.token
+            const deletedUser = await service.deleteUser(userId, tokenUserId, token)
+            return res.status(202).json({
+                message : "Pengguna berhasil dihapus"
+            })
         } catch (error) {
-            return res.status(500).json({ message : "Terjadi kesalahan saat menghapus data pengguna"})
+            return res.status(500).json({
+                message : "Terjadi kesalahan saat menghapus data pengguna",
+                error: error.message
+            
+            })
         }
     }
 }

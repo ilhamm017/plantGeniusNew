@@ -1,4 +1,3 @@
-require('dotenv').config();
 const axios = require('axios');
 const CircuitBreaker = require('opossum');
 
@@ -34,19 +33,21 @@ axiosCircuitBreaker.on('failure', (error) => {
 });
 
 module.exports = {
-    callExternalApi : async (url,method,data=null) => {
+    callExternalApi : async (serviceUrl,url,method,data=null,token) => {
         try {
             const response = await axiosCircuitBreaker.fire({
                 method: method.toLowerCase(),
-                url: `http://${process.env.USER_SERVICE_URL}${url}`,
-                data
+                url: `http://${serviceUrl}${url}`,
+                data,
+                headers : {
+                    Authorization : token
+                }
             })
-            console.log(response)
             return response
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             console.error("Error", error.message)
-            const customError = new Error('Layanan pengguna sedang tidak tersedia. Coba lagi nanti!')
+            const customError = new Error('Layanan Authentikasi sedang tidak tersedia. Coba lagi nanti!')
             customError.status = 503
             throw customError
           }

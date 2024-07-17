@@ -11,31 +11,20 @@ module.exports = {
                     message: "Gambar tidak boleh kosong"
                 })
             }
-
+            //Memanggil endpoint untuk mendeteksi gambar
             const result = await service.uploadToExternalAPI('/predict/', "POST", image)
-            console.log('ini result', result)
-            console.log('ini userId', userId)
-            if (!result) {
-                return res.status(500).json({
-                    message: "Terjadi kesalahan saat mendeteksi gambar",
-                })
-            }
 
+            //Memanggil endpoint untuk membuat riwayat
             const history = await service.createHistory('/history/', "POST", result.prediction, userId, token)
-            if (!history) {
-                return res.status(500).json({
-                    message: "Gambar berhasil dideteksi, tetapi gagal disimpan ke riwayat."
-                });
-            }
 
             return res.status(201).json({
-                message: "Gambar berhasil diunggah dan disimpan",
+                message: "Gambar berhasil diunggah dan riwayat disimpan",
                 data: result.prediction
             })
             
         } catch (error) {
             return res.status(500).json({
-                message: "Gagal mengunggah gambar",
+                message: "Terjadi kesalahan!!",
                 error: error.message
             })
         }

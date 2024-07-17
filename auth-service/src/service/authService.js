@@ -51,7 +51,7 @@ module.exports = {
             //Jika terjadi error, batalkan transaksi
             console.error(`Error saat menambahkan pengguna: ${error.message}`)
             if (transaction) {
-                await transaction.rollback();
+                await transaction.rollback()
             }
             throw error
         }
@@ -66,6 +66,7 @@ module.exports = {
                     email : userData.email
                 }
             })
+            console.log(user)
             if (!user) {
                 throw new Error('Email tidak terdaftar!')
             }
@@ -78,12 +79,70 @@ module.exports = {
 
             //Membuat token JWT
             const token = await Jwt.sign({
-                 id: user.dataValues.id, 
-                 email: user.email 
-                })
+                id: user.dataValues.id, 
+                email: user.email 
+            })
             return token
         } catch (error) {
-            console.error('Error saat login:, error')
+            console.error('Error saat login:', error)
+            throw error
+        }
+    },
+
+    update : async (userId, paramsId, userData) => {
+        try {
+            const user = await UserAuth.findOne({
+                where: {
+                    id: userId
+                }
+            })
+            if (!user) {
+                throw new Error('Pengguna tidak ditemukan!')
+            }
+            if (userId != paramsId) {
+                throw new Error('Token tidak sesuai')
+            }
+            const updatedUser = await UserAuth.update({
+                ...(userData.email ? { email: userData.email } : {}),
+                ...(userData.password ? { password: await Hash.hashPassword(userData.password) } : {}) //===
+            }, {
+                where : {
+                    id : userId
+                }
+            })
+            if (updatedUser[0] === 0) {
+                throw new Error('Update gagal!')
+            }
+            return updatedUser
+        } catch (error) {
+            console.error('Error saat memperbarui data pengguna:', error)
+            throw error
+        }
+    },
+
+    delete : async (userId, paramsId) => {
+        try {
+            const user = await UserAuth.findOne({
+                where: {
+                    id : userId
+                }
+            })
+            if (!user) {
+                throw new Error('Pengguna tidak ditemukan!')
+            }
+            if (userId != paramsId) {
+                throw new Error('Token tidak sesuai')
+            }
+            const deletedUser = await UserAuth.destroy({
+                where: {
+                    id : userId
+                }
+            })
+            if (!deletedUser) {
+                throw new Error('Gagal menghapus pengguna')
+            }
+        } catch (error) {
+            console.error('Error saat menghapus data pengguna:', error)
             throw error
         }
     }
