@@ -27,7 +27,7 @@ module.exports = {
         try {
             const user = await User.findAll()
             if (!user) {
-                throw new Error('User not found')
+                throw new Error('Pengguna tidak ditemukan!')
             }
             return user
         } catch (error) {
@@ -43,7 +43,7 @@ module.exports = {
                 }
             })
             if (!user) {
-                throw new Error('User not found')
+                throw new Error('Pengguna tidak ditemukan!')
             }
             return user
         } catch (error) {
@@ -72,7 +72,7 @@ module.exports = {
                 }
             })
             if (!deletedUser) {
-                throw new Error('User not found')
+                throw new Error('Pengguna tidak ditemukan!')
             }
             return deletedUser
         } catch (error) {

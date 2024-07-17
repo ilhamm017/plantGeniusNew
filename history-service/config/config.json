@@ -1,10 +1,10 @@
 {
   "development": {
-    "username": "thouka",
-    "password": "180618",
+    "username": "postgres",
+    "password": "18062018",
     "database": "history_database_development",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "postgres"
   },
   "test": {
     "username": "root",

@@ -9,16 +9,20 @@ module.exports = {
             if (!authHeader) return res.status(401).json({ message: 'Tidak ada token'})
                 const tokenParts = authHeader.split('.')
             if (tokenParts.length !== 3) {
-            return res.status(401).json({ message: 'Token tidak valid'})
+                return res.status(401).json({ message: 'Token tidak valid'})
             }
-            const decodedToken = helper.verify(authHeader)
-            
+            const decodedToken = await helper.verify(authHeader)
             if (decodedToken.exp) {
-                return res.status(401).json({ message: 'Token kadaluarsa' })
+                const expirationTime = decodedToken.exp * 1000
+                const currentTime = Date.now()
+                if (currentTime > expirationTime) {
+                    return res.status(401).json({ message: 'Token kadaluarsa' })
+                }
             }
             /* Menyimpan data user yang sudah divalidasi ke dalam request object
              req.user akan berisi objek dengan properti id dan email */
-            req.user = { id: decodedToken.id, email: decodedToken.email };
+            req.user = { id: decodedToken.id, email: decodedToken.email, authHeader };
+            console.log('ini decodeToken id', decodedToken) //==============================
             next()
         } catch (error) {
             return res.status(500).json({ message: 'Terjadi kesalahan saat validasi token'})

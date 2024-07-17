@@ -1,11 +1,13 @@
+require('dotenv').config();
 const axios = require('axios')
 const CircuitBreaker = require('opossum')
 
 const CircuitBreakerOption = {
-    time: 3000,
+    time: 30000,
     errorThresholdPercentage: 50,
-    resetTimeout: 10000,
-    halfOpen: true
+    resetTimeout: 100000,
+    halfOpen: false,
+    timeout: 100000
 }
 
 const axiosCircuitBreaker = new CircuitBreaker(axios, CircuitBreakerOption) 
@@ -27,15 +29,15 @@ axiosCircuitBreaker.on('open', () => {
   });
   
   axiosCircuitBreaker.on('failure', (error) => {
-    console.error('Request failed:', error.message);
+    console.error('Request failed:', error);
   });
   
 module.exports = {
-    uploadToExternalAPI : async (url,method,base64Image=null) => {
+    uploadToExternalAPI : async ( url, method, base64Image=null ) => {
         try {
             const response = await axiosCircuitBreaker.fire({
                 method: method.toLowerCase(),
-                url: url,
+                url: `http://${process.env.DETECTION_SERVICE_URL}${url}`,
                 data : {
                     image : base64Image
                 }
@@ -48,8 +50,34 @@ module.exports = {
             }
             return response.data
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error:", error.message);
             throw new Error("Gagal mengupload gambar")
+            throw error
         }
-    }
+    },
+    createHistory : async (url,method,disease,userId,token) => {
+      try {
+          const response = await axiosCircuitBreaker.fire({
+              method: method.toLowerCase(),
+              url: `http://${process.env.HISTORY_SERVICE_URL}${url}`,
+              data : {
+                  userId,
+                  disease
+              },
+              headers: {
+                'Authorization': token
+              }
+          })
+          if (response.status !== 201) {
+              throw new Error({
+                  message : response.data.message,
+                  status : response.status,
+              })
+          }
+          return response
+      } catch (error) {
+          console.error("Error", error.message)
+          throw error
+      }
+  }
 }

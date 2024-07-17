@@ -7,13 +7,13 @@ register: async (req, res) => {
         // Mendapatkan email, password, nama dari body 
         let userData = req.body
         const addUser = await service.create(userData)
+        console.log(addUser)
         return res.status(201).json({ 
-            message: "Pengguna berhasil ditambahkan",
-            userId: addUser.userId
+            message: "Pengguna berhasil ditambahkan"
         })
     } catch (error) {
         // Mengembalikan respon error ketika terjadi error
-        console.error(`Error saat mendaftarkan pengguna: ${error}`);
+        console.error(`Error saat mendaftarkan pengguna: ${error.message}`);
         return res.status(500).json({ message: "Terjadi kesalahan saat mendaftarkan pengguna", error: error.message });
     }
 },
@@ -23,7 +23,7 @@ login: async (req, res) => {
         // Mendapatkan email dan passowrd dari body request
         const userData = req.body;
         const verifedUser = await service.login(userData)
-        return res.ststus(200).json({ token: verifedUser })
+        return res.status(200).json({ token: verifedUser })
     } catch (error) {
         // Jika terjadi error
         console.error(`Error saat login: ${error}`)

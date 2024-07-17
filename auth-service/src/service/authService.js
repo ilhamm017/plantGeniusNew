@@ -4,7 +4,7 @@ const { sequelize } = require('../models')
 const Hash = require('../helpers/Hash')
 const Jwt = require('../helpers/Jwt')
 const { callExternalApi } = require('../service/apiClientService')
-const Url = process.env.USER_SERVICE_URL
+// const Url = process.env.USER_SERVICE_URL
 
 module.exports = {
     //Menambahkan pengguna
@@ -32,7 +32,7 @@ module.exports = {
                     transaction: t
                 }) 
                 //Menambahkan pengguna ke user service
-                const response = await callExternalApi(Url,'post',{
+                const response = await callExternalApi('/users/create','post',{
                     email : userData.email,
                     nama : userData.nama,
                     userId : newUser.dataValues.id
@@ -40,9 +40,8 @@ module.exports = {
                 if (response.status !== 201) {
                     throw new Error('Gagal menambahkan pengguna!')
                 }
-                return response.data
+                return response
             })
-            console.log(transaction)
         } catch (error) { 
             //Jika terjadi error, batalkan transaksi
             console.error(`Error saat menambahkan pengguna: ${error.message}`)
@@ -69,7 +68,7 @@ module.exports = {
                 throw new Error('Password salah!!')
             }
             //Membuat token JWT
-            const token = await Jwt.sign({ id: user.id, email: user.email })
+            const token = await Jwt.sign({ id: user.dataValues.id, email: user.email })
             return token
         } catch (error) {
             console.error('Error saat login:, error')

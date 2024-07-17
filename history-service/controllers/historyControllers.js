@@ -1,4 +1,3 @@
-const { History } = require('../models');
 const service = require('../service/historyService')
 
 module.exports = {
@@ -7,12 +6,13 @@ createHistory : async (req, res) => {
   try {
     const newHistory = req.body
     const userId = req.user.id
+    console.log(userId)
     const addHistory = await service.createHistory(newHistory, userId)
-    res.ststus(201).json({ 
+    return res.status(201).json({ 
       message: "Riwayat deteksi berhasil dibuat" 
     })
   } catch (error) {
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Gagal dalam membuat history',
       message: error.message
     });
@@ -22,9 +22,9 @@ createHistory : async (req, res) => {
 getAllHistory : async (req, res) => {
   try {
     const allHistory = await service.getAllHistory()
-    res.status(200).json(allHistory);
+    return res.status(200).json(allHistory);
   } catch (error) {
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Gagal dalam mendapatkan semua history',
       message: error.message
     });
@@ -34,11 +34,12 @@ getAllHistory : async (req, res) => {
 // Mendapatkan hostroy berdasarkan ID
 getHistoryById : async (req, res) => {
   try {
+    const historyId = req.params.id
     const userId = req.user.id
-    const userHistory = await service.getHistoryById(userId)
-    res.status(200).json(userHistory);
+    const userHistory = await service.getHistoryById(userId, historyId)
+    return res.status(200).json(userHistory);
   } catch (error) {
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Gagal dalam mendapatkan history berdasarkan ID',
       message: error.message
      });
@@ -48,13 +49,15 @@ getHistoryById : async (req, res) => {
 // hapus history berdasarkan ID
 deleteHistory : async (req, res) => {
   try {
-    const historyId = req.user.id
-    const deleteHistory = await service.deleteHistory(historyId)
-    res.status(204).json({ 
+    const historyId = req.params.id
+    const userId = req.user.id
+    const deleteHistory = await service.deleteHistory(historyId, userId)
+    return res.status(204).json({ 
+      historyId: historyId,
       message: "Riwayat deteksi berhasil dihapus" 
     });
   } catch (error) {
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Gagal dalam menghapus history',
       message: error.message
     });

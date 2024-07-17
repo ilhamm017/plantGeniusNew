@@ -1,3 +1,4 @@
+require('dotenv').config();
 const axios = require('axios');
 const CircuitBreaker = require('opossum');
 
@@ -37,12 +38,13 @@ module.exports = {
         try {
             const response = await axiosCircuitBreaker.fire({
                 method: method.toLowerCase(),
-                url,
+                url: `http://${process.env.USER_SERVICE_URL}${url}`,
                 data
             })
+            console.log(response)
             return response
         } catch (error) {
-            console.error("Error:", error.message);
+            console.error("Error:", error);
             throw new Error("Failed to call external API")
         }
     }

@@ -1,13 +1,11 @@
-
-
+const { History } = require('../models');
 module.exports = {
     createHistory : async (historyData, userId) => {
         //membuat history baru
         try {
           const newHistory = await History.create({
             userId: userId,
-            image: historyData.image,
-            disease: historyData.disease
+            diseaseName: historyData.disease
           });
           return newHistory;
         } catch (error) {
@@ -29,10 +27,12 @@ module.exports = {
       },
       
       // Mendapatkan hostroy berdasarkan ID
-      getHistoryById : async (historyId) => {
+      getHistoryById : async (userId, historyId) => {
         try {
+          console.log(historyId, userId)
           const historyEntry = await History.findOne({
             where : {
+                // userId : userId,
                 id : historyId
             }
           })
@@ -46,11 +46,12 @@ module.exports = {
       },
       
       // hapus history berdasarkan ID
-      deleteHistory : async (historyId) => {
+      deleteHistory : async (historyId, userId) => {
         try {
           const historyEntry = await History.destroy({
             where : {
-                id : historyId
+                id : historyId,
+                userId: userId
             }
           })
           if (!historyEntry) {

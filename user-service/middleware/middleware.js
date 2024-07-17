@@ -11,20 +11,23 @@ module.exports = {
             if (tokenParts.length !== 3) {
                 return res.status(401).json({ message: 'Token tidak valid'})
             }
-            const { id, email } = helper.verify(authHeader)
+            const tokenData = await helper.verify(authHeader)
             const user = await User.findOne({
                 where : {
-                    id : id,
-                    email : email
+                    userId : tokenData.id,
+                    email : tokenData.email
                 }
             })
             if (!user) {
-                return res.status(401).json({ message: 'Token tidak valid'})
+                return res.status(401).json({ message: 'Token tidak valid untuk pengguna ini!'})
             }
-            req.user = {id, email}
+            req.user = {id : tokenData.id, email : tokenData.email}
             next()
         } catch (error) {
-            return res.status(500).json({ message: 'Terjadi kesalahan saat validasi token'})
+            return res.status(500).json({
+                message: 'Terjadi kesalahan saat validasi token',
+                error: error.message
+            })
         }
     }
 }
