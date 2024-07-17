@@ -6,7 +6,6 @@ module.exports = {
             const { image } = req.body
             const userId = req.user.id
             const token = req.user.authHeader
-            console.log(token) //=======================
             if (!image) {
                 return res.status(400).json({
                     message: "Gambar tidak boleh kosong"
@@ -18,18 +17,25 @@ module.exports = {
             console.log('ini userId', userId)
             if (!result) {
                 return res.status(500).json({
-                    message: "kesalahan saat mendeteksi gambar",
+                    message: "Terjadi kesalahan saat mendeteksi gambar",
                 })
             }
+
             const history = await service.createHistory('/history/', "POST", result.prediction, userId, token)
-            
+            if (!history) {
+                return res.status(500).json({
+                    message: "Gambar berhasil dideteksi, tetapi gagal disimpan ke riwayat."
+                });
+            }
+
             return res.status(201).json({
-                message: "Image uploaded successfully",
+                message: "Gambar berhasil diunggah dan disimpan",
                 data: result.prediction
             })
+            
         } catch (error) {
             return res.status(500).json({
-                message: "Failed to upload image",
+                message: "Gagal mengunggah gambar",
                 error: error.message
             })
         }

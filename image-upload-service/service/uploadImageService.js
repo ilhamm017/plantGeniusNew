@@ -52,7 +52,6 @@ module.exports = {
         } catch (error) {
             console.error("Error:", error.message);
             throw new Error("Gagal mengupload gambar")
-            throw error
         }
     },
     createHistory : async (url,method,disease,userId,token) => {

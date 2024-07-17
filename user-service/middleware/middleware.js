@@ -6,10 +6,18 @@ module.exports = {
     authenticationMiddleware : async (req, res, next) => {
         try {
             const authHeader = req.get('Authorization')
-            if (!authHeader) return res.status(401).json({ message: 'Tidak ada token'})
-            const tokenParts = authHeader.split('.')
+            if (!authHeader) {
+                return res.status(401).json({
+                        code: 'UNAUTHORIZED',
+                        message: 'Tidak ada token, Authorization tidak ditemukan'
+                    })
+            }
+            const tokenParts = await authHeader.split('.')
             if (tokenParts.length !== 3) {
-                return res.status(401).json({ message: 'Token tidak valid'})
+                return res.status(401).json({
+                        code: 'INVALID_TOKEN_FORMAT',
+                        message: 'Token tidak valid'
+                    })
             }
             const tokenData = await helper.verify(authHeader)
             const user = await User.findOne({
@@ -19,12 +27,19 @@ module.exports = {
                 }
             })
             if (!user) {
-                return res.status(401).json({ message: 'Token tidak valid untuk pengguna ini!'})
+                return res.status(401).json({
+                    code: 'USER_NOT_FOUND',
+                    message: 'Token tidak valid untuk pengguna ini!'
+                })
             }
-            req.user = {id : tokenData.id, email : tokenData.email}
+            req.user = {
+                id : tokenData.id, 
+                email : tokenData.email
+            }
             next()
         } catch (error) {
             return res.status(500).json({
+                code: 'INTERNAL_SERVER_ERROR',
                 message: 'Terjadi kesalahan saat validasi token',
                 error: error.message
             })

@@ -24,7 +24,10 @@ module.exports = {
     read : async (req, res) => {
         try {
             const allUsers = await service.getAllUsers()
-            return res.status(202).json({ allUsers })
+            if (allUsers.length === 0) {
+                return res.status(404).json({ message : "Tidak ada data pengguna"})
+            }
+            return res.status(200).json({ allUsers })
         } catch (error) {
             return res.status(500).json({
                 message : "Terjadi kesalahan saat membaca data pengguna", 
@@ -37,6 +40,9 @@ module.exports = {
         try {
             const { userId } = req.params
             const userById = await service.getUserById(userId)
+            if (!userById) {
+                return res.status(404).json({ message : "Pengguna tidak ditemukan"})
+            }
             return res.status(202).json({ userById })
         } catch (error) {
             return res.status(500).json({
@@ -52,6 +58,9 @@ module.exports = {
             const { email, nama } = req.body
             const dataUser = { email, nama, userId }
             const updatedUser = await service.updateUser(dataUser)
+            if (!updatedUser) {
+                return res.status(404).json({ message : "Pengguna tidak ditemukan"})
+            }
             return res.status(202).json({
                 message : "Pengguna berhasil diperbarui", 
                 dataUser : updatedUser 
@@ -69,6 +78,9 @@ module.exports = {
         try {
             const { userId } = req.params
             const deletedUser = await service.deleteUser(userId)
+            if (!deletedUser) {
+                return res.status(404).json({ message : "Pengguna tidak ditemukan"})
+            }
             return res.status(202).json({ message : "Pengguna berhasil dihapus"})
         } catch (error) {
             return res.status(500).json({ message : "Terjadi kesalahan saat menghapus data pengguna"})

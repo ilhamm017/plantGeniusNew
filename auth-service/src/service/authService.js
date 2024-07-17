@@ -4,13 +4,13 @@ const { sequelize } = require('../models')
 const Hash = require('../helpers/Hash')
 const Jwt = require('../helpers/Jwt')
 const { callExternalApi } = require('../service/apiClientService')
-// const Url = process.env.USER_SERVICE_URL
 
 module.exports = {
     //Menambahkan pengguna
     create : async (userData) => {
         let transaction = null
         try {
+
             //Mengecek user dengan email yang sama
             const existingUser = await UserAuth.findOne({
                 where : {
@@ -20,17 +20,21 @@ module.exports = {
             if (existingUser) {
                 throw new Error('Email sudah terdaftar!')
             }
+
             //Melakukan hashing password
             const hashedPassword = await Hash.hashPassword(userData.password)
+
             //Memulai transaksi menambahkan data pengguna
             transaction = await sequelize.transaction(async t => {
+
                 //MEnambahkan pengguna ke database
                 const newUser = await UserAuth.create({
                     email : userData.email,
                     password : hashedPassword
                 },{
                     transaction: t
-                }) 
+                })
+
                 //Menambahkan pengguna ke user service
                 const response = await callExternalApi('/users/create','post',{
                     email : userData.email,
@@ -42,6 +46,7 @@ module.exports = {
                 }
                 return response
             })
+
         } catch (error) { 
             //Jika terjadi error, batalkan transaksi
             console.error(`Error saat menambahkan pengguna: ${error.message}`)
@@ -51,7 +56,9 @@ module.exports = {
             throw error
         }
     },
+
     login : async (userData) => {
+
         //Mencocokan email dengan database
         try {
             const user = await UserAuth.findOne({
@@ -62,13 +69,18 @@ module.exports = {
             if (!user) {
                 throw new Error('Email tidak terdaftar!')
             }
+
             //Mencocokan password
             const isPasswordCorrect = await Hash.comparePassword(userData.password, user.password)
             if (!isPasswordCorrect) {
                 throw new Error('Password salah!!')
             }
+
             //Membuat token JWT
-            const token = await Jwt.sign({ id: user.dataValues.id, email: user.email })
+            const token = await Jwt.sign({
+                 id: user.dataValues.id, 
+                 email: user.email 
+                })
             return token
         } catch (error) {
             console.error('Error saat login:, error')

@@ -9,7 +9,7 @@ module.exports = {
             if (!authHeader) return res.status(401).json({ message: 'Tidak ada token'})
                 const tokenParts = authHeader.split('.')
             if (tokenParts.length !== 3) {
-                return res.status(401).json({ message: 'Token tidak valid'})
+                return res.status(401).json({ message: 'Format token tidak valid'})
             }
             const decodedToken = await helper.verify(authHeader)
             if (decodedToken.exp) {
@@ -21,11 +21,14 @@ module.exports = {
             }
             /* Menyimpan data user yang sudah divalidasi ke dalam request object
              req.user akan berisi objek dengan properti id dan email */
-            req.user = { id: decodedToken.id, email: decodedToken.email, authHeader };
-            console.log('ini decodeToken id', decodedToken) //==============================
+            req.user = { 
+                id: decodedToken.id, 
+                email: decodedToken.email, 
+                authHeader };
             next()
         } catch (error) {
-            return res.status(500).json({ message: 'Terjadi kesalahan saat validasi token'})
+            console.error(`Error pada authenticationMiddleware: ${error.message}`)
+            return res.status(401).json({ message: 'Token tidak valid'})
         }
     }
 }

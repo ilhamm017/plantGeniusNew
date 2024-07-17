@@ -10,7 +10,7 @@ module.exports = {
                 }
             })
             if (existingUser) {
-                throw new Error('Pengguna sudah terdaftar!')
+                throw new Error('Pengguna dengan email tersebut sudah terdaftar!')
             }
             const newUser = await User.create({
                 email : userData.email,
@@ -26,7 +26,7 @@ module.exports = {
         //mendapatkan semua data user 
         try {
             const user = await User.findAll()
-            if (!user) {
+            if (user.length === 0) {
                 throw new Error('Pengguna tidak ditemukan!')
             }
             return user
@@ -59,6 +59,9 @@ module.exports = {
                 id : userData.userId
             }
         })
+        if (updatedUser[0] === 0) {
+            return new Error('Pengguna tidak ditemukan!')
+        }
         } catch (error) {
             throw error
         }
