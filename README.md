@@ -1,4 +1,3 @@
-
 # API Documentation: Plant Disease Detection App
 
 ## Autentikasi
@@ -7,7 +6,7 @@
 
 #### POST /auth/register
 
-**Deskripsi:** Mendaftarkan pengguna baru.
+**Deskripsi:** Mendaftarkan pengguna baru. Endpoint ini akan memanggil `POST /users/create` di User Service untuk membuat data pengguna jika registrasi berhasil.
 
 **Request Body:**
 
@@ -21,16 +20,18 @@
 
 ```json
 {
-  "message": "User berhasil terdaftar",
-  "userId": "1234" 
+  "status": "sukses",
+  "message": "Berhasil menambahkan pengguna"
 }
 ```
 
-**Response (400 Bad Request):**
+**Response (500 Internal Server Error):**
 
 ```json
 {
-  "message": "Email sudah terdaftar"
+  "status": "gagal",
+  "message": "Terjadi kesalahan saat mendaftarkan pengguna",
+  "error": "Pesan error" 
 }
 ```
 
@@ -49,15 +50,19 @@
 
 ```json
 {
-  "token": "your_jwt_token"
+  "status": "sukses",
+  "message": "Login berhasil",
+  "token": "JWT token"
 }
 ```
 
-**Response (401 Unauthorized):**
+**Response (500 Internal Server Error):**
 
 ```json
 {
-  "message": "Email atau password salah"
+  "status": "error",
+  "message": "terjadi kesalahan saat login",
+  "error": "Pesan error"
 }
 ```
 
@@ -77,20 +82,31 @@
 | --------- | --------- | -------------------------- |
 | email     | string    | Alamat email yang valid   |
 | nama      | string    | Nama lengkap pengguna     |
+| userId     | string    | ID User dari Auth Service |
 
 **Response (201 Created):**
 
 ```json
 {
-  "id": "1234",
-  "email": "user@example.com",
-  "nama": "Nama Pengguna"
+  "status": "sukses",
+  "message" : "Berhasil menambahkan pengguna",
+  "userId" : 123 
+}
+```
+
+**Response (500 Internal Server Error):**
+
+```json
+{ 
+  "status": "error",
+  "message" : "Terjadi kesalahan saat memasukkan data pengguna", 
+  "error": "Pesan error"
 }
 ```
 
 #### GET /users
 
-**Deskripsi:** Mengambil data semua pengguna (Admin Only).
+**Deskripsi:** Mengambil data semua pengguna.
 
 **Headers:**
 
@@ -99,18 +115,30 @@
 **Response (200 OK):**
 
 ```json
-[
-  {
-    "id": "1234",
-    "email": "user1@example.com",
-    "nama": "Nama Pengguna 1"
-  },
-  {
-    "id": "987",
-    "email": "user2@example.com",
-    "nama": "Nama Pengguna 2"
-  }
-]
+{
+  "status": "sukses",
+  "message": "Berhasil mendapatkan data pengguna",
+  "data": [
+    {
+      "id": 1,
+      "nama": "Nama Pengguna 1",
+      "email": "pengguna1@example.com",
+      "userId": 123,
+      // ... kolom lainnya
+    },
+    // ... data pengguna lainnya
+  ]
+}
+```
+
+**Response (500 Internal Server Error):**
+
+```json
+{
+  "status": "error",
+  "message" : "Terjadi kesalahan saat membaca data pengguna", 
+  "error": "Pesan error"
+}
 ```
 
 #### GET /users/:userId
@@ -121,19 +149,35 @@
 
 * Authorization: Bearer <your_jwt_token>
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 
 ```json
 {
-  "id": "1234",
-  "email": "user@example.com",
-  "nama": "Nama Pengguna"
+  "status": "sukses",
+  "message": "Berhasil mendapatkan data pengguna",
+  "data": {
+    "id": 1,
+    "nama": "Nama Pengguna 1",
+    "email": "pengguna1@example.com",
+    "userId": 123,
+    // ... kolom lainnya 
+  }
+}
+```
+
+**Response (500 Internal Server Error):**
+
+```json
+{
+  "status": "error",
+  "message" : "Terjadi kesalahan saat membaca data pengguna",
+  "error": "Pesan error"
 }
 ```
 
 #### PUT /users/:userId
 
-**Deskripsi:** Mengubah data profil pengguna.
+**Deskripsi:** Mengubah data profil pengguna. Endpoint ini akan melakukan update data user di Auth Service jika field `email` diubah.
 
 **Headers:**
 
@@ -145,29 +189,48 @@
 | --------- | --------- | ---------------------------------- |
 | nama      | string    | Nama lengkap pengguna (opsional) |
 | email     | string    | Alamat email (opsional)           |
-| password  | string    | Kata sandi (opsional)            |
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 
 ```json
 {
-  "message": "Profil berhasil diperbarui"
+  "status": "sukses",
+  "message" : "Berhasil memperbarui data pengguna dengan id {userId}" 
+}
+```
+
+**Response (500 Internal Server Error):**
+
+```json
+{
+  "message" : "Terjadi kesalahan saat memperbarui data pengguna",
+  "error": "Pesan error"
 }
 ```
 
 #### DELETE /users/:userId
 
-**Deskripsi:** Menghapus data pengguna.
+**Deskripsi:** Menghapus data pengguna. Endpoint ini akan memanggil `DELETE /auth/{userId}` di Auth Service dan `DELETE /history/{userId}` di History Service.
 
 **Headers:**
 
 * Authorization: Bearer <your_jwt_token>
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 
 ```json
 {
-  "message": "User berhasil dihapus"
+  "status" : "sukses",
+  "message" : "Pengguna dengan id {userId} berhasil dihapus" 
+}
+```
+
+**Response (500 Internal Server Error):**
+
+```json
+{
+  "message" : "Terjadi kesalahan saat menghapus data pengguna",
+  "error": "Pesan error"
 }
 ```
 
@@ -177,7 +240,7 @@
 
 #### POST /images/upload
 
-**Deskripsi:** Mengunggah gambar tanaman untuk dideteksi.
+**Deskripsi:** Mengunggah gambar tanaman untuk dideteksi. Endpoint ini akan memanggil endpoint `POST /history` di History Service untuk mencatat riwayat deteksi.
 
 **Headers:**
 
@@ -186,40 +249,27 @@
 
 **Request Body:**
 
-* `image`: File gambar
+* `image`: File gambar (Base64)
 
-**Response (200 OK):**
-
-```json
-{
-  "message": "Gambar berhasil diunggah dan diproses",
-  "result": {
-    "disease": "Penyakit Busuk Daun"
-  }
-}
-```
-
-**Response (400 Bad Request):**
+**Response (201 Created):**
 
 ```json
 {
-  "message": "Gagal memproses gambar."
+  "status": "sukses",
+  "message": "Deteksi berhasil",
+  "data": "Hasil prediksi penyakit"
 }
 ```
 
-### Detection Service (/detection)
+**Response (500 Internal Server Error):**
 
-#### POST /detection/analyze
-
-**Deskripsi:** Menganalisis gambar tanaman (dipanggil oleh Image Upload Service).
-
-**Request Body:**
-
-* File gambar (dikirim dari Image Upload Service)
-
-**Response:**
-
-* Hasil analisis (jenis penyakit) - dikirim kembali ke Image Upload Service
+```json
+{
+  "status": "error",
+  "message": "Terjadi kesalahan!!",
+  "error": "Pesan error"
+}
+```
 
 ## History Service (/history)
 
@@ -235,20 +285,28 @@
 
 | Parameter  | Tipe Data | Deskripsi                  |
 | ---------- | --------- | ---------------------------- |
-| userId     | string    | ID Pengguna               |
-| imageUrl   | string    | URL gambar yang diunggah  |
 | disease    | string    | Jenis penyakit yang terdeteksi|
-| accuracy   | float     | Tingkat akurasi deteksi  |
 
 **Response (201 Created):**
 
 ```json
 {
-  "message": "Riwayat deteksi berhasil dibuat"
+  "status": "sukses",
+  "message": "Riwayat deteksi berhasil dibuat" 
 }
 ```
 
-#### GET /history/:userId
+**Response (500 Internal Server Error):**
+
+```json
+{
+  "status": "gagal",
+  "message": "Pesan error",
+  "error": "Gagal dalam membuat history"
+}
+```
+
+#### GET /history/:id
 
 **Deskripsi:** Mengambil riwayat deteksi berdasarkan user ID.
 
@@ -259,43 +317,32 @@
 **Response (200 OK):**
 
 ```json
-[
-  {
-    "id": "1",
-    "userId": "1234",
-    "imageUrl": "lokasi image",
-    "disease": "Penyakit Busuk Daun",
-    "createdAt": "2023-10-26T10:00:00Z"
-  },
-  {
-    "id": "2",
-    "userId": "12345",
-    "imageUrl": "lokasi image",
-    "disease": "Penyakit Bercak Daun",
-    "createdAt": "2023-10-27T15:30:00Z"
+{
+  "status": "sukses",
+  "message": "Berhasil mendapatkan history",
+  "data": {
+    "id": 1,
+    "userId": 123,
+    "diseaseName": "Penyakit X",
+    "createdAt": "2023-10-27T07:10:27.916Z",
+    "updatedAt": "2023-10-27T07:10:27.916Z"
   }
-]
+}
+```
+
+**Response (500 Internal Server Error):**
+
+```json
+{ 
+  "status": "error",
+  "message": "Pesan error",
+  "error": "Gagal dalam mendapatkan history berdasarkan ID"
+}
 ```
 
 #### GET /history
 
-**Deskripsi:** Mengambil seluruh riwayat deteksi (Admin Only).
-
-**Headers:**
-
-* Authorization: Bearer <jwt_token>
-
-**Response (200 OK):**
-
-```json
-[
-  // ... (Similar structure to GET /history/:userId)
-]
-```
-
-#### DELETE /history/:historyId
-
-**Deskripsi:** Menghapus riwayat deteksi berdasarkan ID.
+**Deskripsi:** Mengambil seluruh riwayat deteksi.
 
 **Headers:**
 
@@ -305,8 +352,57 @@
 
 ```json
 {
-  "message": "Riwayat deteksi berhasil dihapus"
+  "status": "sukses",
+  "data": [
+    {
+      "id": 1,
+      "userId": 123, 
+      "diseaseName": "Penyakit X",
+      "createdAt": "2023-10-27T07:10:27.916Z",
+      "updatedAt": "2023-10-27T07:10:27.916Z"
+    },
+    // ... data riwayat lainnya
+  ]
 }
 ```
 
+**Response (500 Internal Server Error):**
 
+```json
+{
+  "status": "error",
+  "message": "Pesan error",
+  "error": "Gagal dalam mendapatkan semua history"
+}
+```
+
+#### DELETE /history/:id
+
+**Deskripsi:** Menghapus riwayat deteksi berdasarkan ID.
+
+**Headers:**
+
+* Authorization: Bearer <jwt_token>
+
+**Response (204 No Content):**
+
+```json
+{ 
+  "status": "sukses",
+  "message": "Berhasil menghapus history dengan ID {id}"
+}
+```
+
+**Response (500 Internal Server Error):**
+
+```json
+{ 
+  "error": "Gagal dalam menghapus history",
+  "message": "Pesan error"
+}
+```
+
+## Catatan Umum
+
+* Semua endpoint yang membutuhkan autentikasi JWT harus menyertakan token di header dengan format `Authorization: Bearer <jwt_token>`.
+* Dokumentasi ini dapat diperbarui dengan informasi lebih lanjut mengenai error handling dan validasi data. 
