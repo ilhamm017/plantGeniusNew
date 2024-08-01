@@ -1,4 +1,3 @@
-const { User } = require('../models')
 const service = require('../service/userService')
 
 module.exports = {
@@ -9,12 +8,14 @@ module.exports = {
             const { nama, email, userId } = req.body
             const dataUser = { userId, nama, email }
             const newUser = await service.createUser(dataUser)
-            res.status(201).json({ 
-                message : "Pengguna berhasil ditambahkan",
+            res.status(201).json({
+                status: "sukses",
+                message : newUser.message,
                 userId : newUser.userId
              })
         } catch (error) {
             return res.status(500).json({ 
+                status: "error",
                 message : "Terjadi kesalahan saat memasukkan data pengguna", 
                 error: error.message
             })
@@ -24,12 +25,14 @@ module.exports = {
     read : async (req, res) => {
         try {
             const allUsers = await service.getAllUsers()
-            if (allUsers.length === 0) {
-                return res.status(404).json({ message : "Tidak ada data pengguna"})
-            }
-            return res.status(200).json({ allUsers })
+            return res.status(200).json({
+                status: "sukses",
+                message: allUsers.message,
+                data: allUsers.data
+            })
         } catch (error) {
             return res.status(500).json({
+                status: "error",
                 message : "Terjadi kesalahan saat membaca data pengguna", 
                 error: error.message
             })
@@ -41,12 +44,14 @@ module.exports = {
             const { userId } = req.params
             const tokenUserId = req.user.id
             const userById = await service.getUserById(userId, tokenUserId)
-            if (!userById) {
-                return res.status(404).json({ message : "Pengguna tidak ditemukan"})
-            }
-            return res.status(202).json({ userById })
+            return res.status(202).json({
+                status: "sukses",
+                message: userById.message,
+                data: userById.data
+            })
         } catch (error) {
             return res.status(500).json({
+                status: "error",
                 message : "Terjadi kesalahan saat membaca data pengguna",
                 error: error.message
             })
@@ -62,11 +67,12 @@ module.exports = {
             const dataUser = { email, nama, userId, tokenUserId, token}
             const updatedUser = await service.updateUser(dataUser)
             return res.status(202).json({
-                message : "Pengguna berhasil diperbarui" 
+                status: "sukses",
+                message : updatedUser.message
             })
         } catch (error) {
             return res.status(500).json({
-                message : "Terjadi kesalahan saat mengupdate data pengguna",
+                message : "Terjadi kesalahan saat memperbarui data pengguna",
                 error: error.message
             })
         }
@@ -80,7 +86,8 @@ module.exports = {
             const token = req.user.token
             const deletedUser = await service.deleteUser(userId, tokenUserId, token)
             return res.status(202).json({
-                message : "Pengguna berhasil dihapus"
+                status : "sukses",
+                message : deletedUser.message
             })
         } catch (error) {
             return res.status(500).json({

@@ -7,7 +7,9 @@ module.exports = {
             userId: userId,
             diseaseName: historyData.disease
           });
-          return newHistory;
+          return {
+            message: 'Berhasil membuat history'
+          };
         } catch (error) {
           throw error
         }
@@ -20,7 +22,13 @@ module.exports = {
           if (!historyEntries) {
             throw new Error('Tidak ditemukan history');
           }
-          return historyEntries;
+          if (historyEntries.length === 0) {
+            throw new Error('Tidak ada history')
+        }
+          return {
+            message: 'Berhasil mendapatkan history',
+            data: historyEntries
+          }
         } catch (error) {
           throw error
         }
@@ -29,17 +37,25 @@ module.exports = {
       // Mendapatkan hostroy berdasarkan ID
       getHistoryById : async (userId, historyId) => {
         try {
-          console.log(historyId, userId)
+          if (userId != historyId) {
+            throw new Error('Token tidak sesuai')
+          }
           const historyEntry = await History.findOne({
             where : {
-                // userId : userId,
+                userId : userId,
                 id : historyId
             }
           })
           if (!historyEntry) {
             throw new Error('History tidak ditemukan');
           }
-          return historyEntry;
+          if (userHistory.length === 0) {
+            throw new Error('History tidak ditemukan')
+          }
+          return {
+            message: 'Berhasil mendapatkan history',
+            data: historyEntry
+          }
         } catch (error) {
           throw error
         }
@@ -48,16 +64,21 @@ module.exports = {
       // hapus history berdasarkan ID
       deleteHistory : async (historyId, userId) => {
         try {
+          if (userId != historyId) {
+            throw new Error('Token tidak sesuai')
+          }
           const historyEntry = await History.destroy({
             where : {
-                id : historyId,
-                userId: userId
+              userId: userId,
+                id : historyId
             }
           })
           if (!historyEntry) {
             throw new Error('History tidak ditemukan');
           }
-          return historyEntry;
+          return {
+            message: `Berhasil menghapus history dengan ID ${historyId}`
+          };
         } catch (error) {
           throw error
         }

@@ -9,7 +9,7 @@ module.exports = {
             const addUser = await service.create(userData)
             return res.status(201).json({ 
                 status: 'sukses',
-                message: "Pengguna berhasil ditambahkan"
+                message: addUser.message
             })
         } catch (error) {
             // Mengembalikan respon error ketika terjadi error
@@ -27,11 +27,6 @@ module.exports = {
             // Mendapatkan email dan passowrd dari body request
             const userData = req.body;
             const verifedUser = await service.login(userData)
-            if (!verifedUser) {
-                return res.status(404).json({
-                    message: 'Pengguna tidak teraftar'
-                })
-            }
             return res.status(200).json({
                 status: 'sukses',
                 message: 'Login berhasil',
@@ -55,12 +50,14 @@ module.exports = {
             const userData = req.body
             const updatedUser = await service.update(userId, paramsId, userData)
             return res.status(200).json({
-                message: "Data pengguna berhasil diperbarui"
+                status: 'sukses',
+                message: updatedUser.message
             })
         } catch (error) {
             return res.status(500).json({
-                error : error.message,
-                message: "Terjadi kesalahan saat melakukan update data pengguna"
+                status: 'error',
+                message: "Terjadi kesalahan saat melakukan update data pengguna",
+                error : error.message
             })
         }
     },
@@ -71,7 +68,8 @@ module.exports = {
             const paramsId = req.params.id
             const deletedUser = await service.delete(userId, paramsId)
             return res.status(200).json({
-                message: "Data pengguna berhasil dihapus"
+                status: 'sukses',
+                message: deletedUser.message
             })
         } catch (error) {
             return res.status(500).json({

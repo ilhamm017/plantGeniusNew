@@ -7,9 +7,7 @@ module.exports = {
             const userId = req.user.id
             const token = req.user.authHeader
             if (!image) {
-                return res.status(400).json({
-                    message: "Gambar tidak boleh kosong"
-                })
+                throw new Error("Gambar tidak boleh kosong")
             }
             //Memanggil endpoint untuk mendeteksi gambar
             const result = await service.uploadToExternalAPI('/predict/', "POST", image)
@@ -18,12 +16,14 @@ module.exports = {
             const history = await service.createHistory('/history/', "POST", result.prediction, userId, token)
 
             return res.status(201).json({
-                message: "Gambar berhasil diunggah dan riwayat disimpan",
+                status: "sukses",
+                message: "Deteksi berhasil",
                 data: result.prediction
             })
             
         } catch (error) {
             return res.status(500).json({
+                status: 'error',
                 message: "Terjadi kesalahan!!",
                 error: error.message
             })

@@ -1,6 +1,6 @@
+require('dotenv').config()
 const { User, sequelize } = require('../models')
 const { callExternalApi } = require('../service/apiClientService')
-require('dotenv').config();
 
 module.exports = {
     createUser : async (userData) => {
@@ -19,7 +19,10 @@ module.exports = {
                 nama : userData.nama,
                 userId : userData.userId
             })
-            return newUser
+            return {
+                message : 'Berhasil menambahkan pengguna',
+                userId : newUser.userId
+            }
         } catch (error) {
             throw error
         }
@@ -31,7 +34,13 @@ module.exports = {
             if (user.length === 0) {
                 throw new Error('Pengguna tidak ditemukan!')
             }
-            return user
+            if (!user) {
+                throw new Error('Gagal mendapatkan data pengguna')
+            }
+            return {
+                message : 'Berhasil mendapatkan data pengguna',
+                data : user
+            }
         } catch (error) {
             throw error
         }  
@@ -39,7 +48,9 @@ module.exports = {
     getUserById : async (userId, tokenUserId) => {
         //mendapatkan data user berdasarkan id
         try {
-            console.log(userId, tokenUserId)
+            if (userId != tokenUserId) {
+                throw new Error('Token tidak sesuai')
+            }
             const user = await User.findOne({
                 where : {
                     id : userId
@@ -48,15 +59,18 @@ module.exports = {
             if (!user) {
                 throw new Error('Pengguna tidak ditemukan!')
             }
-            if (userId != tokenUserId) {
-                throw new Error('Token tidak sesuai')
+            return {
+                message : 'Berhasil mendapatkan data pengguna',
+                data : user
             }
-            return user
         } catch (error) {
             throw error
         }
     },
     updateUser : async (userData) => {
+        if (userData.userId != userData.tokenUserId) {
+            throw new Error('Token tidak sesuai')
+        }
         let transaction = null
         //mengupdate data user berdasarkan id
         try {
@@ -68,11 +82,8 @@ module.exports = {
         if (!user) {
             throw new Error('Pengguna tidak ditemukan!')
         }
-        if (userData.userId != userData.tokenUserId) {
-            throw new Error('Token tidak sesuai')
-        }
-
-            transaction = await sequelize.transaction(async t => {
+        //Memulai transaksi update data pengguna
+        transaction = await sequelize.transaction(async t => {
             //Memperbarui data pengguna di User service
             const updatedUser = await User.update({
                 ...(userData.nama ? { nama: userData.nama } : {}),
@@ -85,20 +96,22 @@ module.exports = {
             })
            
             if (updatedUser[0] === 0) {
-                throw new Error('Update gagal!')
+                throw new Error('Terjadi kesalahan saat memperbarui data pengguna')
             }
             if (userData.email) {
                 //Memperbarui data pengguna di Auth service
                 const updatedUserService = await callExternalApi(process.env.USER_SERVICE_URL,`/auth/${userData.tokenUserId}`, 'PUT', {
-                email : userData.email
+                    email : userData.email
                 }, userData.token)
                 if (!updatedUserService) {
+                    console.error(`Terjadi kesalahan saat memperbarui data di Auth service`)
                     throw new Error('Gagal memperbarui data di Auth service')
                 }
             }
             return {
-                message: 'Berhasil memperbarui data'
+                message: `Berhasil memperbarui data pengguna dengan id ${userData.userId}`
             }
+            
         })
         } catch (error) {
             console.error(`Error saat menambahkan pengguna: ${error.message}`)
@@ -109,6 +122,9 @@ module.exports = {
         }
     },
     deleteUser : async (userId, tokenUserId, token) => {
+        if (user.userId != tokenUserId) {
+            throw new Error('Token tidak sesuai!')
+        }
         //menghapus data user berdasarkan id
         let transaction = null
         try {
@@ -120,11 +136,7 @@ module.exports = {
             if (!user) {
                 throw new Error('pengguna tidak ditemukan')
             }
-            console.log(userId, tokenUserId)
-            if (user.userId != tokenUserId) {
-                throw new Error('Token tidak sesuai!')
-            }
-
+            //Memulai transaksi menghapus data pengguna
             transaction = await sequelize.transaction( async t => {
                 //Menghapus data pengguna
                 const deletedUser = await User.destroy({
@@ -134,14 +146,21 @@ module.exports = {
                     transaction : t
                 })
                 if (!deletedUser) {
-                    throw new Error('Gagal menghapus pengguna!')
+                    throw new Error('Gagal menghapus data pengguna!')
                 }
-
+                //Menghapus data pengguna autentikasi
                 const deletedUserAuth = await callExternalApi(process.env.USER_SERVICE_URL, `/auth/${tokenUserId}`, 'DELETE', {}, token)
                 if (!deletedUserAuth) {
-                    throw new Error('Gagal menghapus pengguna autentikasi!')
+                    throw new Error('Gagal menghapus data pengguna autentikasi!')
                 }
-                return deletedUserAuth
+                //Menghapus riwayat deteksi 
+                const deletedHistory = await callExternalApi(process.env.HISTORY_SERVICE_URL, `/history/${tokenUserId}`, 'DELETE', {}, token)
+                if (!deletedHistory) {
+                    throw new Error('Gagal menghapus riwayat deteksi!')
+                }
+                return {
+                    message: `Pengguna dengan id ${userId} berhasil dihapus`
+                }
             })
         } catch (error) {
             console.error(`Error saat menghapus pengguna: ${error.message}`)

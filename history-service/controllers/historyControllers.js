@@ -7,9 +7,6 @@ createHistory : async (req, res) => {
         const newHistory = req.body
         const userId = req.user.id
         const addHistory = await service.createHistory(newHistory, userId)
-        if (!addHistory) {
-            throw new Error('Gagal menambahkan history')
-        }
         return res.status(201).json({
             status: 'sukses',
             message: "Riwayat deteksi berhasil dibuat" 
@@ -17,8 +14,8 @@ createHistory : async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             status: 'gagal',
-            error: 'Gagal dalam membuat history',
-            message: error.message
+            message: error.message,
+            error: 'Gagal dalam membuat history'
         });
     }
 },
@@ -26,9 +23,6 @@ createHistory : async (req, res) => {
 getAllHistory : async (req, res) => {
   try {
       const allHistory = await service.getAllHistory()
-      if (allHistory.length === 0) {
-          throw new Error('Tidak ada history')
-      }
       return res.status(200).json({
           status: 'sukses',
           data: allHistory
@@ -36,8 +30,8 @@ getAllHistory : async (req, res) => {
   } catch (error) {
     return res.status(500).json({
           status: 'error',
-          error: 'Gagal dalam mendapatkan semua history',
-          message: error.message
+          message: error.message,
+          error: 'Gagal dalam mendapatkan semua history'
     });
   }
 },
@@ -48,19 +42,16 @@ getHistoryById : async (req, res) => {
     const historyId = req.params.id
     const userId = req.user.id
     const userHistory = await service.getHistoryById(userId, historyId)
-
-    if (userHistory.length === 0) {
-      throw new Error('History tidak ditemukan')
-    }
     return res.status(200).json({
       status: 'sukses',
-      data: userHistory
+      message: userHistory.message,
+      data: userHistory.data
     });
   } catch (error) {
     return res.status(500).json({ 
       status: 'error',
-      error: 'Gagal dalam mendapatkan history berdasarkan ID',
-      message: error.message
+      message: error.message,
+      error: 'Gagal dalam mendapatkan history berdasarkan ID'
      });
   }
 },
@@ -76,8 +67,8 @@ deleteHistory : async (req, res) => {
       throw new Error('Riwayat deteksi tidak ditemukan')
     }
     return res.status(204).json({ 
-      historyId: historyId,
-      message: "Riwayat deteksi berhasil dihapus" 
+      status: 'sukses',
+      message: deleteHistory.message
     });
   } catch (error) {
     return res.status(500).json({ 

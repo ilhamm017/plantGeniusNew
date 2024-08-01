@@ -41,8 +41,8 @@ module.exports = {
                 url: `http://${process.env.USER_SERVICE_URL}${url}`,
                 data
             })
-            console.log(response)
             return response
+            
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             console.error("Error", error.message)

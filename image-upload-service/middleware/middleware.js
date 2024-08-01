@@ -24,7 +24,8 @@ module.exports = {
             req.user = { 
                 id: decodedToken.id, 
                 email: decodedToken.email, 
-                authHeader };
+                authHeader 
+            };
             next()
         } catch (error) {
             console.error(`Error pada authenticationMiddleware: ${error.message}`)
