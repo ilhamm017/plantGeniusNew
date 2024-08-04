@@ -20,7 +20,7 @@ module.exports = {
                 userId : userData.userId
             })
             return {
-                message : 'Berhasil menambahkan pengguna',
+                message : 'Berhasil menambahkan data pengguna',
                 userId : newUser.userId
             }
         } catch (error) {
@@ -108,11 +108,10 @@ module.exports = {
                     throw new Error('Gagal memperbarui data di Auth service')
                 }
             }
-            return {
-                message: `Berhasil memperbarui data pengguna dengan id ${userData.userId}`
-            }
-            
         })
+        return {
+            message: `Berhasil memperbarui data pengguna dengan id ${userData.userId}`
+        }
         } catch (error) {
             console.error(`Error saat menambahkan pengguna: ${error.message}`)
             if (transaction) {
@@ -122,7 +121,7 @@ module.exports = {
         }
     },
     deleteUser : async (userId, tokenUserId, token) => {
-        if (user.userId != tokenUserId) {
+        if (userId != tokenUserId) {
             throw new Error('Token tidak sesuai!')
         }
         //menghapus data user berdasarkan id
@@ -130,7 +129,7 @@ module.exports = {
         try {
             const user = await User.findOne({
                 where : {
-                    id : userId
+                    userId
                 }
             })
             if (!user) {
@@ -141,7 +140,7 @@ module.exports = {
                 //Menghapus data pengguna
                 const deletedUser = await User.destroy({
                     where : {
-                        id : userId
+                        userId
                     },
                     transaction : t
                 })
@@ -154,14 +153,15 @@ module.exports = {
                     throw new Error('Gagal menghapus data pengguna autentikasi!')
                 }
                 //Menghapus riwayat deteksi 
-                const deletedHistory = await callExternalApi(process.env.HISTORY_SERVICE_URL, `/history/${tokenUserId}`, 'DELETE', {}, token)
+                const deletedHistory = await callExternalApi(process.env.HISTORY_SERVICE_URL, '/history/', 'DELETE', {}, token)
+                console.log(deletedHistory)
                 if (!deletedHistory) {
                     throw new Error('Gagal menghapus riwayat deteksi!')
                 }
-                return {
-                    message: `Pengguna dengan id ${userId} berhasil dihapus`
-                }
             })
+            return {
+                message: `Pengguna dengan id ${userId} berhasil dihapus`
+            }
         } catch (error) {
             console.error(`Error saat menghapus pengguna: ${error.message}`)
             if (transaction) {

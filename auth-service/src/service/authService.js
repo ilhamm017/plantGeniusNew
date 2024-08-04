@@ -44,11 +44,10 @@ module.exports = {
                     console.error(`Gagal menambahkan pengguna ke user service: ${response.data}`)
                     throw new Error('Gagal menambahkan pengguna ke user service!')
                 }
-                return {
-                    message: 'Berhasil menambahkan pengguna'
-                }
             })
-
+            return {
+                message: 'Berhasil menambahkan pengguna'
+            }
         } catch (error) { 
             //Jika terjadi error, batalkan transaksi
             console.error(`Error saat menambahkan pengguna: ${error.message}`)
@@ -129,7 +128,9 @@ module.exports = {
 
     delete : async (userId, paramsId) => {
         try {
-
+            if (userId != paramsId) {
+                throw new Error('Token tidak sesuai')
+            }
             const user = await UserAuth.findOne({
                 where: {
                     id : userId
@@ -137,9 +138,6 @@ module.exports = {
             })
             if (!user) {
                 throw new Error('Gagal menghapus pengguna karena pengguna tidak ditemukan')
-            }
-            if (userId != paramsId) {
-                throw new Error('Token tidak sesuai')
             }
             const deletedUser = await UserAuth.destroy({
                 where: {

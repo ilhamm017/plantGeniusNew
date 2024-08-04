@@ -39,9 +39,8 @@ getAllHistory : async (req, res) => {
 // Mendapatkan hostroy berdasarkan ID
 getHistoryById : async (req, res) => {
   try {
-    const historyId = req.params.id
     const userId = req.user.id
-    const userHistory = await service.getHistoryById(userId, historyId)
+    const userHistory = await service.getHistoryById(userId)
     return res.status(200).json({
       status: 'sukses',
       message: userHistory.message,
@@ -59,17 +58,12 @@ getHistoryById : async (req, res) => {
 // hapus history berdasarkan ID
 deleteHistory : async (req, res) => {
   try {
-    const historyId = req.params.id
     const userId = req.user.id
-
-    const deleteHistory = await service.deleteHistory(historyId, userId)
-    if (!deleteHistory) {
-      throw new Error('Riwayat deteksi tidak ditemukan')
-    }
-    return res.status(204).json({ 
+    const deleteHistory = await service.deleteHistory(userId)
+    return res.status(200).json({ 
       status: 'sukses',
       message: deleteHistory.message
-    });
+    })
   } catch (error) {
     return res.status(500).json({ 
       error: 'Gagal dalam menghapus history',

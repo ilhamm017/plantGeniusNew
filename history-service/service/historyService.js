@@ -37,19 +37,19 @@ module.exports = {
       // Mendapatkan hostroy berdasarkan ID
       getHistoryById : async (userId, historyId) => {
         try {
-          if (userId != historyId) {
-            throw new Error('Token tidak sesuai')
-          }
           const historyEntry = await History.findOne({
             where : {
-                userId : userId,
-                id : historyId
+              userId : userId,
+              id : historyId
             }
           })
+          if (userId != historyEntry.userId) {
+            throw new Error('Token tidak sesuai')
+          }
           if (!historyEntry) {
             throw new Error('History tidak ditemukan');
           }
-          if (userHistory.length === 0) {
+          if (historyEntry.length === 0) {
             throw new Error('History tidak ditemukan')
           }
           return {
@@ -62,23 +62,32 @@ module.exports = {
       },
       
       // hapus history berdasarkan ID
-      deleteHistory : async (historyId, userId) => {
+      deleteHistory : async (userId) => {
         try {
-          if (userId != historyId) {
+          const historyData = await History.findOne({
+            where : {
+              userId
+            }
+          })
+          if (!historyData) { 
+            return {
+              message : 'Tidak ada history untuk dihapus'
+            }
+          }
+          if (userId != historyData.userId) {
             throw new Error('Token tidak sesuai')
           }
           const historyEntry = await History.destroy({
             where : {
-              userId: userId,
-                id : historyId
+              userId
             }
           })
           if (!historyEntry) {
-            throw new Error('History tidak ditemukan');
+            throw new Error('Gagal menghapus History');
           }
           return {
-            message: `Berhasil menghapus history dengan ID ${historyId}`
-          };
+            message: `Berhasil menghapus history`
+          }
         } catch (error) {
           throw error
         }

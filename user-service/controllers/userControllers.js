@@ -93,7 +93,6 @@ module.exports = {
             return res.status(500).json({
                 message : "Terjadi kesalahan saat menghapus data pengguna",
                 error: error.message
-            
             })
         }
     }

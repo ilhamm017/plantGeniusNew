@@ -13,11 +13,11 @@ module.exports = {
             })
         } catch (error) {
             // Mengembalikan respon error ketika terjadi error
-            console.error(`Error saat mendaftarkan pengguna: ${error.message}`);
+            console.error(`Error saat mendaftarkan pengguna: ${error}`);
             return res.status(500).json({
                 status: 'gagal',
                 message: "Terjadi kesalahan saat mendaftarkan pengguna", 
-                error: error.message 
+                error: error.message
             });
         }
     },

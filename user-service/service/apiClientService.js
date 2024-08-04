@@ -47,7 +47,7 @@ module.exports = {
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             console.error("Error", error.message)
-            const customError = new Error('Layanan Authentikasi sedang tidak tersedia. Coba lagi nanti!')
+            const customError = new Error('Layanan sedang tidak tersedia. Coba lagi nanti!')
             customError.status = 503
             throw customError
           }

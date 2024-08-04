@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "postgres",
-    "password": "18062018",
+    "password": "180618",
     "database": "history_database_development",
     "host": "127.0.0.1",
     "dialect": "postgres"
