@@ -1,3 +1,4 @@
+const { where } = require('sequelize');
 const { History } = require('../models');
 module.exports = {
     createHistory : async (historyData, userId) => {
@@ -16,15 +17,23 @@ module.exports = {
       },
       
       // Mendapatkan semua history 
-      getAllHistory : async () => {
+      getAllHistory : async (userId,tokenUserId) => {
         try {
-          const historyEntries = await History.findAll();
+          console.log(userId, tokenUserId)
+          if (userId != tokenUserId) {
+            throw new Error('Token tidak sesuai')
+          }
+          const historyEntries = await History.findAll({
+            where: {
+              userId
+            }
+          });
           if (!historyEntries) {
             throw new Error('Tidak ditemukan history');
           }
           if (historyEntries.length === 0) {
             throw new Error('Tidak ada history')
-        }
+          }
           return {
             message: 'Berhasil mendapatkan history',
             data: historyEntries
@@ -43,14 +52,14 @@ module.exports = {
               id : historyId
             }
           })
-          if (userId != historyEntry.userId) {
-            throw new Error('Token tidak sesuai')
-          }
           if (!historyEntry) {
             throw new Error('History tidak ditemukan');
           }
           if (historyEntry.length === 0) {
             throw new Error('History tidak ditemukan')
+          }
+          if (userId != historyEntry.userId) {
+            throw new Error('Token tidak sesuai')
           }
           return {
             message: 'Berhasil mendapatkan history',

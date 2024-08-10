@@ -3,7 +3,7 @@ const { UserAuth } = require('../models')
 const { sequelize } = require('../models')
 const Hash = require('../helpers/Hash')
 const Jwt = require('../helpers/Jwt')
-const { callExternalApi } = require('../service/apiClientService')
+const { callExternalApi } = require('./apiClientService')
 
 module.exports = {
     //Menambahkan pengguna

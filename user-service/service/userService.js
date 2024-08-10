@@ -48,16 +48,16 @@ module.exports = {
     getUserById : async (userId, tokenUserId) => {
         //mendapatkan data user berdasarkan id
         try {
-            if (userId != tokenUserId) {
-                throw new Error('Token tidak sesuai')
-            }
             const user = await User.findOne({
                 where : {
-                    id : userId
+                    userId
                 }
             })
             if (!user) {
                 throw new Error('Pengguna tidak ditemukan!')
+            }
+            if (userId != tokenUserId) {
+                throw new Error('Token tidak sesuai')
             }
             return {
                 message : 'Berhasil mendapatkan data pengguna',
@@ -68,20 +68,20 @@ module.exports = {
         }
     },
     updateUser : async (userData) => {
-        if (userData.userId != userData.tokenUserId) {
-            throw new Error('Token tidak sesuai')
-        }
         let transaction = null
         //mengupdate data user berdasarkan id
         try {
-        const user = await User.findOne({
-            where: {
-                id: userData.userId
+            const user = await User.findOne({
+                where: {
+                    userId: userData.userId
+                }
+            })
+            if (!user) {
+                throw new Error('Pengguna tidak ditemukan!')
             }
-        })
-        if (!user) {
-            throw new Error('Pengguna tidak ditemukan!')
-        }
+            if (userData.userId != userData.tokenUserId) {
+                throw new Error('Token tidak sesuai')
+            }
         //Memulai transaksi update data pengguna
         transaction = await sequelize.transaction(async t => {
             //Memperbarui data pengguna di User service

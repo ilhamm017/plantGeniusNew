@@ -22,7 +22,9 @@ createHistory : async (req, res) => {
 // Mendapatkan semua history 
 getAllHistory : async (req, res) => {
   try {
-      const allHistory = await service.getAllHistory()
+      const userId = req.params.userId
+      const tokenUserId = req.user.id
+      const allHistory = await service.getAllHistory(userId, tokenUserId)
       return res.status(200).json({
           status: 'sukses',
           data: allHistory
@@ -39,8 +41,9 @@ getAllHistory : async (req, res) => {
 // Mendapatkan hostroy berdasarkan ID
 getHistoryById : async (req, res) => {
   try {
+    const historyId = req.params.historyId
     const userId = req.user.id
-    const userHistory = await service.getHistoryById(userId)
+    const userHistory = await service.getHistoryById(userId,historyId)
     return res.status(200).json({
       status: 'sukses',
       message: userHistory.message,

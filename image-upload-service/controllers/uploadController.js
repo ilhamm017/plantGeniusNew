@@ -15,7 +15,7 @@ module.exports = {
             //Memanggil endpoint untuk membuat riwayat
             const history = await service.createHistory('/history/', "POST", result.prediction, userId, token)
 
-            return res.status(201).json({
+            return res.status(200).json({
                 status: "sukses",
                 message: "Deteksi berhasil",
                 data: result.prediction
