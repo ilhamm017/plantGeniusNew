@@ -76,6 +76,7 @@ module.exports = {
                     userId: userData.userId
                 }
             })
+            console.log(user);
             if (!user) {
                 throw new Error('Pengguna tidak ditemukan!')
             }
@@ -90,7 +91,7 @@ module.exports = {
                 ...(userData.email ? { email: userData.email } : {})
             },{
                 where : {
-                    id : userData.userId
+                    userId : userData.userId
                 },
                 transaction: t
             })
@@ -121,9 +122,6 @@ module.exports = {
         }
     },
     deleteUser : async (userId, tokenUserId, token) => {
-        if (userId != tokenUserId) {
-            throw new Error('Token tidak sesuai!')
-        }
         //menghapus data user berdasarkan id
         let transaction = null
         try {
@@ -134,6 +132,9 @@ module.exports = {
             })
             if (!user) {
                 throw new Error('pengguna tidak ditemukan')
+            }
+            if (userId != tokenUserId) {
+                throw new Error('Token tidak sesuai!')
             }
             //Memulai transaksi menghapus data pengguna
             transaction = await sequelize.transaction( async t => {

@@ -29,7 +29,7 @@ axiosCircuitBreaker.on('open', () => {
   });
   
   axiosCircuitBreaker.on('failure', (error) => {
-    console.error('Request failed:', error);
+    console.error('Request failed:', error.message);
   });
   
 module.exports = {
@@ -42,16 +42,17 @@ module.exports = {
                     image : base64Image
                 }
             })
+            console.log(response.data)
             if (response.status !== 200) {
                 throw new Error({
-                    message : response.data.message,
+                    message : response.data,
                     status : response.status,
                 })
             }
             return response.data
         } catch (error) {
-            console.error("Error:", error.message);
-            throw new Error("Gagal mengupload gambar")
+            console.error("Error:", error.response.data.message);
+            throw new Error(`Gagal mendeteksi gambar, ${error.response.data.message}`)
         }
     },
 

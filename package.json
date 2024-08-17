@@ -11,5 +11,9 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "axios": "^1.7.3",
+    "chai": "^5.1.1"
   }
 }

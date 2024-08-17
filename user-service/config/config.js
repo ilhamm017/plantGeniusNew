@@ -2,7 +2,7 @@ require('dotenv').config()
 module.exports = {
   "development": {
     "username": process.env.POSTGRES_DEVELOPMENT_USERNAME,
-    "password": process.env.POSTGRES_DEVELOPMNET_PASSWORD,
+    "password": process.env.POSTGRES_DEVELOPMENT_PASSWORD,
     "database": process.env.POSTGRES_DEVELOPMENT_DATABASE,
     "host": process.env.POSTGRES_DEVELOPMENT_HOST,
     "dialect": process.env.POSTGRES_DEVELOPMENT_DIALECT

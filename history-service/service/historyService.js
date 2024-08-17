@@ -19,10 +19,6 @@ module.exports = {
       // Mendapatkan semua history 
       getAllHistory : async (userId,tokenUserId) => {
         try {
-          console.log(userId, tokenUserId)
-          if (userId != tokenUserId) {
-            throw new Error('Token tidak sesuai')
-          }
           const historyEntries = await History.findAll({
             where: {
               userId
@@ -33,6 +29,9 @@ module.exports = {
           }
           if (historyEntries.length === 0) {
             throw new Error('Tidak ada history')
+          }
+          if (userId != tokenUserId) {
+            throw new Error('Token tidak sesuai')
           }
           return {
             message: 'Berhasil mendapatkan history',
