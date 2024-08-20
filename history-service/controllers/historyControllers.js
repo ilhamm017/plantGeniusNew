@@ -9,13 +9,14 @@ createHistory : async (req, res) => {
         const addHistory = await service.createHistory(newHistory, userId)
         return res.status(201).json({
             status: 'sukses',
+            userId,
             message: "Riwayat deteksi berhasil dibuat" 
         })
     } catch (error) {
         return res.status(500).json({
             status: 'gagal',
             message: error.message,
-            error: 'Gagal dalam membuat history'
+            error: error.errors
         });
     }
 },
@@ -27,6 +28,7 @@ getAllHistory : async (req, res) => {
       const allHistory = await service.getAllHistory(userId, tokenUserId)
       return res.status(200).json({
           status: 'sukses',
+          userId,
           data: allHistory
     });
   } catch (error) {
@@ -46,6 +48,7 @@ getHistoryById : async (req, res) => {
     const userHistory = await service.getHistoryById(userId,historyId)
     return res.status(200).json({
       status: 'sukses',
+      userId,
       message: userHistory.message,
       data: userHistory.data
     });
@@ -53,7 +56,7 @@ getHistoryById : async (req, res) => {
     return res.status(500).json({ 
       status: 'error',
       message: error.message,
-      error: 'Gagal dalam mendapatkan history berdasarkan ID'
+      error: error.errors
      });
   }
 },
@@ -65,12 +68,14 @@ deleteHistory : async (req, res) => {
     const deleteHistory = await service.deleteHistory(userId)
     return res.status(200).json({ 
       status: 'sukses',
+      userId,
       message: deleteHistory.message
     })
   } catch (error) {
     return res.status(500).json({ 
-      error: 'Gagal dalam menghapus history',
-      message: error.message
+      status: 'error',
+      message: error.message,
+      error: 'Gagal dalam menghapus history'
     });
   }
 }

@@ -1,17 +1,25 @@
 const { where } = require('sequelize');
 const { History } = require('../models');
+const { httpError } = require('../../auth-service/helpers/httpError');
 module.exports = {
     createHistory : async (historyData, userId) => {
         //membuat history baru
         try {
+          if (!historyData && !userId) {
+            throw new httpError(404, 'Hasil deteksi dan userId tidak ditemukan!')
+          }
           const newHistory = await History.create({
-            userId: userId,
+            userId,
             diseaseName: historyData.disease
           });
           return {
             message: 'Berhasil membuat history'
           };
         } catch (error) {
+          if (error.name === 'SequelizeValidationError') {
+            const errorMsg = error.errors[0].message
+            throw new httpError(400, errorMsg)
+        }
           throw error
         }
       },
@@ -24,16 +32,17 @@ module.exports = {
               userId
             }
           });
-          if (!historyEntries) {
-            throw new Error('Tidak ditemukan history');
-          }
           if (historyEntries.length === 0) {
-            throw new Error('Tidak ada history')
+            throw new httpError(404, 'History tidak ditemukan')
+          }
+          if (!historyEntries) {
+            throw new httpError(500, 'Gagal mendapatkan history!')
           }
           if (userId != tokenUserId) {
-            throw new Error('Token tidak sesuai')
+            throw new httpError(401, 'Token tidak sesuai!')
           }
           return {
+            userId,
             message: 'Berhasil mendapatkan history',
             data: historyEntries
           }
@@ -47,20 +56,21 @@ module.exports = {
         try {
           const historyEntry = await History.findOne({
             where : {
-              userId : userId,
+              userId ,
               id : historyId
             }
           })
-          if (!historyEntry) {
-            throw new Error('History tidak ditemukan');
-          }
           if (historyEntry.length === 0) {
-            throw new Error('History tidak ditemukan')
+            throw new httpError(404, 'History tidak ditemukan!')
+          }
+          if (!historyEntry) {
+            throw new httpError(500, 'Gagal mendapatkan history')
           }
           if (userId != historyEntry.userId) {
-            throw new Error('Token tidak sesuai')
+            throw new httpError(401, 'Token tidak sesuai')
           }
           return {
+            userId,
             message: 'Berhasil mendapatkan history',
             data: historyEntry
           }
@@ -78,12 +88,10 @@ module.exports = {
             }
           })
           if (!historyData) { 
-            return {
-              message : 'Tidak ada history untuk dihapus'
-            }
+            throw new httpError(404, 'Pengguna tidak ditemukan!')
           }
           if (userId != historyData.userId) {
-            throw new Error('Token tidak sesuai')
+            throw new httpError(401, 'Token tidak sesuai!')
           }
           const historyEntry = await History.destroy({
             where : {
@@ -91,7 +99,7 @@ module.exports = {
             }
           })
           if (!historyEntry) {
-            throw new Error('Gagal menghapus History');
+            throw new httpError(500, 'Gagal saat menghapus History');
           }
           return {
             message: `Berhasil menghapus history`

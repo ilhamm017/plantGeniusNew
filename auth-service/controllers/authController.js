@@ -7,18 +7,21 @@ module.exports = {
             // Mendapatkan email, password, nama dari body 
             let userData = req.body
             const addUser = await service.create(userData)
+            // console.log(addUser)
             return res.status(201).json({ 
                 status: 'sukses',
+                userId: addUser.userId,
                 message: addUser.message
             })
+
         } catch (error) {
             // Mengembalikan respon error ketika terjadi error
-            console.error(`Error saat mendaftarkan pengguna: ${error}`);
-            return res.status(500).json({
-                status: 'gagal',
-                message: "Terjadi kesalahan saat mendaftarkan pengguna", 
-                error: error.message
-            });
+            console.log(error)
+            return res.status(error.statusCode || 500).json({
+                status: 'error',
+                message: error.message,
+                error: error.error
+            })
         }
     },
 
@@ -29,16 +32,17 @@ module.exports = {
             const verifedUser = await service.login(userData)
             return res.status(200).json({
                 status: 'sukses',
+                userId: verifedUser.userId,
                 message: 'Login berhasil',
-                token: verifedUser
+                token: verifedUser.token
             })
         } catch (error) {
             // Jika terjadi error
             console.error(`Error saat login: ${error}`)
-            return res.status(500).json({ 
+            return res.status(error.statusCode || 500).json({ 
                 status: 'error',
-                message: "terjadi kesalahan saat login",
-                error: error.message
+                message: error.message, 
+                error: error.errors
             })
         }
     },
@@ -51,13 +55,15 @@ module.exports = {
             const updatedUser = await service.update(userId, paramsId, userData)
             return res.status(200).json({
                 status: 'sukses',
+                userId: updatedUser.userId,
                 message: updatedUser.message
             })
         } catch (error) {
-            return res.status(500).json({
+            console.log(error)
+            return res.status(error.statusCode || 500).json({
                 status: 'error',
-                message: "Terjadi kesalahan saat melakukan update data pengguna",
-                error : error.message
+                message: error.message,
+                error : error.errors
             })
         }
     },
@@ -69,13 +75,15 @@ module.exports = {
             const deletedUser = await service.delete(userId, paramsId)
             return res.status(200).json({
                 status: 'sukses',
+                userId,
                 message: deletedUser.message
             })
         } catch (error) {
-            return res.status(500).json({
+            return res.status(error.statusCode || 500).json({
                 error : error.message,
-                message: "Terjadi kesalahan saat menghapus data pengguna"
-            })
-        }
+                message : error.message,
+                error : error.errors
+        })
+    }
     }
 }

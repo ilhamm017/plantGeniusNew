@@ -16,17 +16,25 @@ module.exports = (sequelize, DataTypes) => {
   UserAuth.init({
     email: {
       type: DataTypes.STRING,
-      allowNull:false,
+      allowNull: false,
       unique: true,
       validate: {
         isEmail: {
           msg:'Format email tidak valid'
+        },
+        notEmpty: {
+          msg: 'Email tidak boleh kosong'
         }
       }
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false, 
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: 'Password tidak boleh kosong!'
+        }
+      }
     }
   }, {
     sequelize,

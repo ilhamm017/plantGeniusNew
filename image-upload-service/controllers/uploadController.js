@@ -17,6 +17,7 @@ module.exports = {
 
             return res.status(200).json({
                 status: "sukses",
+                userId,
                 message: "Deteksi berhasil",
                 data: result.prediction
             })

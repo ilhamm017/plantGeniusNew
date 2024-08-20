@@ -8,6 +8,7 @@ module.exports = {
             const authHeader = req.get('Authorization')
             if (!authHeader) {
                 return res.status(401).json({
+                        status: 'gagal',
                         code: 'UNAUTHORIZED',
                         message: 'Tidak ada token, Authorization tidak ditemukan'
                     })
@@ -15,6 +16,7 @@ module.exports = {
             const tokenParts = await authHeader.split('.')
             if (tokenParts.length !== 3) {
                 return res.status(401).json({
+                        status: 'gagal',
                         code: 'INVALID_TOKEN_FORMAT',
                         message: 'Token tidak valid'
                     })
@@ -27,6 +29,7 @@ module.exports = {
             })
             if (!user) {
                 return res.status(401).json({
+                    status: 'gagal',
                     code: 'USER_NOT_FOUND',
                     message: 'Token tidak valid!'
                 })

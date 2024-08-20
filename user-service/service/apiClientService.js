@@ -1,5 +1,6 @@
 const axios = require('axios');
 const CircuitBreaker = require('opossum');
+const { httpError } = require('../helpers/httpError')
 
 const CircuitBreakerOption = {
     time: 3000,
@@ -47,9 +48,7 @@ module.exports = {
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             console.error("Error", error.message)
-            const customError = new Error('Layanan sedang tidak tersedia. Coba lagi nanti!')
-            customError.status = 503
-            throw customError
+            throw new httpError(503, 'Layanan sedang tidak tersedia. Coba lagi nanti!')
           }
           throw error
         }

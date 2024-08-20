@@ -10,14 +10,19 @@ module.exports = {
             const newUser = await service.createUser(dataUser)
             res.status(201).json({
                 status: "sukses",
-                message : newUser.message,
-                userId : newUser.userId
+                userId : newUser.userId,
+                message : newUser.message
              })
         } catch (error) {
-            return res.status(500).json({ 
+            // console.log(error)
+            const errorArray = Array.isArray(error) ? error : [error]
+            const errorResponse = {
+                errors: errorArray.map(err => (err))
+            }
+            return res.status(error.statusCode || 500).json({
                 status: "error",
-                message : "Terjadi kesalahan saat memasukkan data pengguna", 
-                error: error.message
+                message: error.message,
+                errors: error.error
             })
         }
     },
@@ -33,8 +38,8 @@ module.exports = {
         } catch (error) {
             return res.status(500).json({
                 status: "error",
-                message : "Terjadi kesalahan saat membaca data pengguna", 
-                error: error.message
+                message : error.message, 
+                error: error.errors
             })
         }
     },
@@ -46,14 +51,15 @@ module.exports = {
             const userById = await service.getUserById(userId, tokenUserId)
             return res.status(202).json({
                 status: "sukses",
+                userId,
                 message: userById.message,
                 data: userById.data
             })
         } catch (error) {
             return res.status(500).json({
                 status: "error",
-                message : "Terjadi kesalahan saat membaca data pengguna",
-                error: error.message
+                message : error.message,
+                error: error.errors
             })
         }
     },
@@ -67,13 +73,15 @@ module.exports = {
             const dataUser = { email, nama, userId, tokenUserId, token}
             const updatedUser = await service.updateUser(dataUser)
             return res.status(202).json({
+                userId: userId,
                 status: "sukses",
                 message : updatedUser.message
             })
         } catch (error) {
-            return res.status(500).json({
-                message : "Terjadi kesalahan saat memperbarui data pengguna",
-                error: error.message
+            return res.status(error.statusCode || 500).json({
+                status: 'error',
+                message : error.message,
+                error: error.errors
             })
         }
     },
@@ -86,13 +94,15 @@ module.exports = {
             const token = req.user.token
             const deletedUser = await service.deleteUser(userId, tokenUserId, token)
             return res.status(202).json({
+                userId : userId,
                 status : "sukses",
                 message : deletedUser.message
             })
         } catch (error) {
-            return res.status(500).json({
-                message : "Terjadi kesalahan saat menghapus data pengguna",
-                error: error.message
+            return res.status(error.statusCode).json({
+                status: 'error',
+                message : error.message,
+                error: error.errors
             })
         }
     }
