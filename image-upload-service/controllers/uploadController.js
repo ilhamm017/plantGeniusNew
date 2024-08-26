@@ -23,11 +23,9 @@ module.exports = {
             })
             
         } catch (error) {
-            console.log(error)
-            return res.status(500).json({
-                status: 'error',
-                message: "Terjadi kesalahan!!",
-                error: error.message
+            return res.status(error.response.status || 500).json({
+                status: error.code,
+                message: error.response.data.message
             })
         }
     }

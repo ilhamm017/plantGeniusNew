@@ -51,7 +51,8 @@ module.exports = {
         try {
             const userId = req.user.id
             const paramsId = req.params.id
-            const userData = req.body
+            const {email, password} = req.body
+            const userData = {email, password}
             const updatedUser = await service.update(userId, paramsId, userData)
             return res.status(200).json({
                 status: 'sukses',
@@ -59,11 +60,10 @@ module.exports = {
                 message: updatedUser.message
             })
         } catch (error) {
-            console.log(error)
             return res.status(error.statusCode || 500).json({
                 status: 'error',
                 message: error.message,
-                error : error.errors
+                error : error.error
             })
         }
     },

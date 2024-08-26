@@ -94,23 +94,38 @@ module.exports = {
         let errors = []
         //mengupdate data user berdasarkan id  
         try {
-            console.log(userData)
+            // ---- Cek apakah ada data email dan nama ----
             if(!userData.email && !userData.nama) {
                 return {
                     message: 'Tidak ada yang diperbarui!'
                 }
+            } else if (userData.email) {
+                // ---- Cek apakah email yang ingin diganti sudah digunakan orang lain ----
+                const updateUser = await User.findOne({
+                    where: {
+                        email: userData.email
+                    }
+                })
+                if (updateUser) {
+                    errors.push('Email sudah digunakan!')
+                    throw new httpError(409, 'Validation Error!', 'Validation Error', errors )
+                }
             }
+            // ---- Mendapatkan data pengguna terkini ----
             const user = await User.findOne({
                 where: {
                     userId: userData.userId
                 }
             })
+            // ---- Jika data pengguna tidak ditemukan, lempar error ----
             if (!user) {
                 throw new httpError(404, 'Pengguna tidak ditemukan!')
             }
+            // ---- Pastikan token sesuai dengan id pengguna ----
             if (userData.userId != userData.tokenUserId) {
                 throw new httpError(401, 'Token tidak sesuai!')
             }
+            // ---- Cek validasi data email dan nama ----
             try {
                 const checkData = await User.build({
                     ...(userData.email ? { email: userData.email} : { email: user.email }),
@@ -118,25 +133,15 @@ module.exports = {
                     userId: user.userId
                 })
                 const checkedData = await checkData.validate()
-                console.log(checkedData)
             } catch (error) {
+                // ---- Kembalikasn error validasi ----
                 error.errors.forEach(err => {
                     errors.push(err.message)
                 })
                 throw new httpError(400, 'Validation Error!', 'VAlidation Error!', errors)
             }
-            const updateUser = await User.findOne({
-                where: {
-                    userId: user.userId,
-                    ...(userData.email ? { email: userData.email} : { email: user.email }),
-                    ...(userData.nama ? { nama: userData.nama} : { nama: user.nama })
-                }
-            })
-            // if (!updateUser) {
-            //     errors.push('Gagal memperbarui pengguna!')
-            //     console.log(updateUser)
-            //     throw new httpError(500, 'Gagal memperbarui pengguna!')
-            // }
+            
+     
         //Memulai transaksi update data pengguna
         transaction = await sequelize.transaction(async t => {
             //Memperbarui data pengguna di User service
@@ -201,11 +206,10 @@ module.exports = {
                 }
                 //Menghapus data pengguna autentikasi
                 const deletedUserAuth = await callExternalApi(process.env.USER_SERVICE_URL, `/auth/${tokenUserId}`, 'DELETE', {}, token)
-                if (!deletedUserAuth) {
-                    throw new httpError(deletedUserAuth.status, 'Gagal menghapus data pengguna di Auth-Service!')
-                }
+                console.log(deletedUserAuth)
                 //Menghapus riwayat deteksi 
-                const deletedHistory = await callExternalApi(process.env.HISTORY_SERVICE_URL, '/history/', 'DELETE', {}, token)
+                const deletedHistory = await callExternalApi(process.env.HISTORY_SERVICE_URL, `/history/${tokenUserId}`, 'DELETE', {}, token)
+                console.log(deletedHistory)
                 if (!deletedHistory) {
                     throw new httpError(deletedUserAuth.status, 'Gagal menghapus data riwayat pengguna!')
                 }
@@ -217,6 +221,9 @@ module.exports = {
             console.error(`Error saat menghapus pengguna: ${error.message}`)
             if (transaction) {
                 await transaction.rollback()
+            }
+            if (error.response) {
+                throw new httpError(error.response.status, error.response.data.message, error.response.statusText)
             }
             throw error
         }

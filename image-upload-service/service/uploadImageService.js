@@ -1,6 +1,7 @@
 require('dotenv').config();
 const axios = require('axios')
-const CircuitBreaker = require('opossum')
+const CircuitBreaker = require('opossum');
+const { httpError } = require('../../user-service/helpers/httpError');
 
 const CircuitBreakerOption = {
     time: 30000,
@@ -42,17 +43,10 @@ module.exports = {
                     image : base64Image
                 }
             })
-            console.log(response.data)
-            if (response.status !== 200) {
-                throw new Error({
-                    message : response.data,
-                    status : response.status,
-                })
-            }
             return response.data
         } catch (error) {
             console.error("Error:", error.response.data.message);
-            throw new Error(`Gagal mendeteksi gambar, ${error.response.data.message}`)
+            throw error
         }
     },
 

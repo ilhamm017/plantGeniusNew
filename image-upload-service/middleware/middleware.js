@@ -29,7 +29,7 @@ module.exports = {
             next()
         } catch (error) {
             console.error(`Error pada authenticationMiddleware: ${error.message}`)
-            return res.status(401).json({ message: 'Token tidak valid'})
+            return res.status(400).json({ message: 'Token tidak valid'})
         }
     }
 }

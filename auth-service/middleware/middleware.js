@@ -1,4 +1,5 @@
 //Middleware untuk validasi token jwt user 
+const { httpError } = require('../helpers/httpError')
 const helper = require('../helpers/Jwt')
 const { UserAuth } = require('../models')
 
@@ -27,19 +28,20 @@ module.exports = {
                     id : tokenData.id
                 }
             })
-            if (!user) {
-                return res.status(401).json({
-                    status: 'gagal',
-                    code: 'USER_NOT_FOUND',
-                    message: 'Token tidak valid!'
-                })
-            }
+        
             req.user = {
                 id : tokenData.id, 
                 email : tokenData.email
             }
             next()
         } catch (error) {
+            if (error.message == 'invalid token') {
+                return res.status(401).json({
+                    status: 'gagal',
+                    message: 'Validation Error',
+                    error: error.message
+                })
+            }
             return res.status(500).json({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: 'Terjadi kesalahan saat validasi token',

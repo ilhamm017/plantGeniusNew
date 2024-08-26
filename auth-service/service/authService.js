@@ -22,7 +22,7 @@ module.exports = {
                 // ---- Tangani jika email sudah terdaftar ----
                 if (existingUser) {
                     errors.push('Email sudah terdaftar!')
-                    throw new httpError(409, 'Email sudah terdaftar!', 'Validation Error!')
+                    throw new httpError(409, 'Validation Error!', 'Validation Error!', errors)
                 }
                 // ---- Validasi nama ----
                 if (!userData.nama) {
@@ -129,8 +129,9 @@ module.exports = {
             }
             //Jika token tidak sesuai, lemparkan error
             if (userId != paramsId) {
-                throw new httpError(401, 'Validator Error!', 'Token tidak sesuai!')
+                throw new httpError(401, 'Validator Error!', 'Validation Error!', 'Token tidak sesuai!')
             }
+
             const updatedUser = await UserAuth.update({
                 ...(userData.email ? { email: userData.email } : {}),
                 ...(userData.password ? { password: await Hash.hashPassword(userData.password) } : {}) 
@@ -170,7 +171,7 @@ module.exports = {
             })
             // ---- Jika tidak ada, lempar error ----
             if (!user) {
-                throw new httpError(404, 'Gagal menghapus pengguna karena pengguna tidak ditemukan!')
+                throw new httpError(404, 'Pengguna tidak ditemukan!')
             }
             if (userId != paramsId) {
                 throw new httpError(401, 'Token tidak sesuai!')
@@ -189,6 +190,12 @@ module.exports = {
             }
         } catch (error) {
             console.error('Error saat menghapus data pengguna:', error)
+            if (error.statusCode == 404) {
+                return {
+                    userId: userId,
+                    message: error.message
+                }
+            }
             throw error
         }
     }

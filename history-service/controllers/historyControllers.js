@@ -32,7 +32,7 @@ getAllHistory : async (req, res) => {
           data: allHistory
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
           status: 'error',
           message: error.message,
           error: 'Gagal dalam mendapatkan semua history'
@@ -53,7 +53,7 @@ getHistoryById : async (req, res) => {
       data: userHistory.data
     });
   } catch (error) {
-    return res.status(500).json({ 
+    return res.status(error.statusCode).json({ 
       status: 'error',
       message: error.message,
       error: error.errors
@@ -64,8 +64,9 @@ getHistoryById : async (req, res) => {
 // hapus history berdasarkan ID
 deleteHistory : async (req, res) => {
   try {
-    const userId = req.user.id
-    const deleteHistory = await service.deleteHistory(userId)
+    const userId = req.params.userId
+    const tokenId = req.user.id
+    const deleteHistory = await service.deleteHistory(userId, tokenId)
     return res.status(200).json({ 
       status: 'sukses',
       userId,

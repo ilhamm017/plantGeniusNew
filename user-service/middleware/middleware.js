@@ -41,6 +41,12 @@ module.exports = {
             }
             next()
         } catch (error) {
+            if (error.message == 'invalid token') {
+                return res.status(401).json({
+                    status: 'gagal',
+                    message: error.message,
+                })
+            }
             return res.status(500).json({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: 'Terjadi kesalahan saat validasi token',

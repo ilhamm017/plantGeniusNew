@@ -56,10 +56,13 @@ module.exports = {
         try {
           const historyEntry = await History.findOne({
             where : {
-              userId ,
+              userId: userId,
               id : historyId
             }
           })
+          if (!historyEntry) {
+            throw new httpError(404, 'History tidak ditemukan!')
+          }
           if (historyEntry.length === 0) {
             throw new httpError(404, 'History tidak ditemukan!')
           }
@@ -80,31 +83,33 @@ module.exports = {
       },
       
       // hapus history berdasarkan ID
-      deleteHistory : async (userId) => {
+      deleteHistory : async (userId, tokenId) => {
         try {
+          if (userId != tokenId) {
+            throw new httpError(401, 'Token tidak sesuai!')
+          }
           const historyData = await History.findOne({
             where : {
               userId
             }
           })
-          if (!historyData) { 
-            throw new httpError(404, 'Pengguna tidak ditemukan!')
-          }
-          if (userId != historyData.userId) {
-            throw new httpError(401, 'Token tidak sesuai!')
+          if (!historyData) {
+            throw new httpError(404, 'Tidak ada history!')
           }
           const historyEntry = await History.destroy({
             where : {
               userId
             }
           })
-          if (!historyEntry) {
-            throw new httpError(500, 'Gagal saat menghapus History');
-          }
           return {
             message: `Berhasil menghapus history`
           }
         } catch (error) {
+          if (error.statusCode == 404){
+            return {
+              message: 'Tidak ada history untuk dihapus!'
+            }
+          }
           throw error
         }
       }

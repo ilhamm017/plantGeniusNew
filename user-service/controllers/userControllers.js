@@ -56,7 +56,7 @@ module.exports = {
                 data: userById.data
             })
         } catch (error) {
-            return res.status(500).json({
+            return res.status(error.statusCode || 500).json({
                 status: "error",
                 message : error.message,
                 error: error.errors
@@ -81,7 +81,7 @@ module.exports = {
             return res.status(error.statusCode || 500).json({
                 status: 'error',
                 message : error.message,
-                error: error.errors
+                error: error.error
             })
         }
     },
@@ -99,7 +99,8 @@ module.exports = {
                 message : deletedUser.message
             })
         } catch (error) {
-            return res.status(error.statusCode).json({
+            console.log(error)
+            return res.status(error.statusCode || 500).json({
                 status: 'error',
                 message : error.message,
                 error: error.errors
